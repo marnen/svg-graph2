@@ -4,7 +4,7 @@ require_relative '../lib/SVG/Graph/Line'
 require_relative '../lib/SVG/Graph/Pie'
 
 
-File.open( "data.txt" ) { |fin|
+File.open(File.join(__dir__, "data.txt")) { |fin|
   title = fin.readline
   fields = fin.readline.split( /,/ )
   female_data = fin.readline.split( " " ).collect{|x| x.to_i}
@@ -30,4 +30,3 @@ File.open( "data.txt" ) { |fin|
     })
   puts graph.burn
 }
-
