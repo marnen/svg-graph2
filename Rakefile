@@ -25,5 +25,7 @@
 task default: %w[test]
 
 task :test do
-  ruby "test/test*.rb"
+  Dir['test/test*.rb'].each do |file|
+    ruby file
+  end
 end
