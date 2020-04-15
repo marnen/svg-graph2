@@ -25,8 +25,5 @@
 task default: %w[test]
 
 task :test do
-  ruby "test/test_data_point.rb"
-  ruby "test/test_plot.rb"
-  ruby "test/test_svg_graph.rb"
-  ruby "test/test_graph.rb"
+  ruby "test/test*.rb"
 end
