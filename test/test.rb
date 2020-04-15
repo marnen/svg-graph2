@@ -17,7 +17,7 @@ def gen klass, args, title, fields, female_data, male_data
   #args[ :x_title ]             = 'X'
   args[ :x_title_location ] = :middle
   args[ :show_y_title ]        = true
-  
+
   args[ :y_title_text_direction ] = :bt
   args[ :y_title ]             ='Y Scale very long name'
   #args[ :y_title ]             ='Y'
@@ -45,23 +45,22 @@ File.open( File.expand_path("../data.txt", __FILE__ )) { |fin|
 
   for file, klass, args in [
     [ "bar", SVG::Graph::Bar,
-      { :scale_integers => true, 
+      { :scale_integers => true,
 	      :stack => :side } ],
     [ "barhorizontal",SVG::Graph::BarHorizontal,
       {:scale_integers=> true,
 	     :stack=>:side,
 	     :rotate_x_labels => true
       }],
-    [ "line", SVG::Graph::Line, 
-      { :scale_integers => true, 
+    [ "line", SVG::Graph::Line,
+      { :scale_integers => true,
 	    :area_fill => true, } ],
-    [ "pie", SVG::Graph::Pie, 
-      { :expand_greatest => true, 
+    [ "pie", SVG::Graph::Pie,
+      { :expand_greatest => true,
 	    :show_data_labels => true, } ],
     ]
-    File.open("#{file}.svg", "w") {|fout| 
+    File.open(File.join(__dir__, "#{file}.svg"), "w") {|fout|
       fout.print( gen(klass, args, title, fields, female_data, male_data ) )
     }
   end
 }
-
