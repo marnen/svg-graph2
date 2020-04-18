@@ -2,6 +2,9 @@ TODO / Backlog
 * refactor various hardcoded constant pixel offsets in Graph class to use named constants or variables
 * Fix bug in Plot where min/max_x/y_value are not respected, TODO
 
+== Unreleased
+* Translate tests from Minitest and Test::Unit to RSpec [thanks marnen, #25]
+
 === 2.2.0 / 2019-11-26
 * on top of 2.2.0.beta adds the following
 * Fixed Divizion by zero when data is 0,0 in Pie [thanks chrismedrdz, PR #16]
