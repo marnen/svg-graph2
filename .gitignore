@@ -2,6 +2,7 @@
 *.gem
 Gemfile.lock
 coverage
+spec/*.svg
 test/*.svg
 *.orig
 
