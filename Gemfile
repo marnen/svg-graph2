@@ -4,6 +4,8 @@ source "https://rubygems.org"
 # Include everything needed to run rake, tests, features, etc.
 group :development do
   gem 'guard-rspec'
+  gem 'guard' # necessary only for guard-minitest
+  gem 'guard-minitest'
 end
 
 group :test do
