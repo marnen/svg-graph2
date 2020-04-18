@@ -1,3 +1,5 @@
+# TODO: what is this file for? It was translated from test/single.rb, which wasn't run when all the other tests were...
+
 require_relative '../lib/SVG/Graph/BarHorizontal'
 require_relative '../lib/SVG/Graph/Bar'
 require_relative '../lib/SVG/Graph/Line'
