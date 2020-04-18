@@ -1,6 +1,7 @@
 *.html
 *.gem
 Gemfile.lock
+coverage
 test/*.svg
 *.orig
 

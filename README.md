@@ -1,6 +1,10 @@
 SVG::Graph
 ============
 
+[![Build Status](https://travis-ci.com/marnen/svg-graph2.svg?branch=master)](https://travis-ci.com/marnen/svg-graph2)
+[![Maintainability](https://api.codeclimate.com/v1/badges/6231f5df83e017fd49fc/maintainability)](https://codeclimate.com/github/marnen/svg-graph2/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/6231f5df83e017fd49fc/test_coverage)](https://codeclimate.com/github/marnen/svg-graph2/test_coverage)
+
 Description
 -----------
 This repo is the continuation of the original [SVG::Graph library](http://www.germane-software.com/software/SVG/SVG::Graph/) by Sean Russell. I'd like to thank Claudio Bustos for giving me permissions to continue publishing the gem under it's original name: [svg-graph](https://rubygems.org/gems/svg-graph)

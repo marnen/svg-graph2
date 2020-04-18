@@ -26,6 +26,7 @@ task default: %w[test]
 
 task :test do
   Dir['test/test*.rb'].each do |file|
-    ruby file
+    simplecov = ENV['COVERAGE'] ? ['-r', './test/simplecov'] : []
+    ruby *(simplecov + [file])
   end
 end
