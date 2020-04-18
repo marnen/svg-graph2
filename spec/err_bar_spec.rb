@@ -1,3 +1,5 @@
+require 'spec_helper'
+
 require_relative '../lib/SVG/Graph/ErrBar'
 
 describe SVG::Graph::ErrBar do

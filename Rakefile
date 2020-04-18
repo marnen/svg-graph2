@@ -21,12 +21,12 @@
 #  self.remote_rdoc_dir = 'svg-graph'
 #end
 
-# run all unit tests with 'rake test'
-task default: %w[test]
+# run all unit tests with 'rake spec'
 
-task :test do
-  Dir['test/test*.rb'].each do |file|
-    simplecov = ENV['COVERAGE'] ? ['-r', './test/simplecov'] : []
-    ruby *(simplecov + [file])
-  end
+begin
+  require 'rspec/core/rake_task'
+  RSpec::Core::RakeTask.new(:spec)
+rescue LoadError
 end
+
+task default: %w[spec]

@@ -1,3 +1,5 @@
+require 'spec_helper'
+
 require_relative '../lib/SVG/Graph/Plot'
 require_relative '../lib/SVG/Graph/DataPoint'
 

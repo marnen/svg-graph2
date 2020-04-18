@@ -1,3 +1,5 @@
+require 'spec_helper'
+
 require_relative '../lib/svggraph'
 
 describe SVG::Graph::Graph do
