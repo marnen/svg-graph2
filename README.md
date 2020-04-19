@@ -1,7 +1,6 @@
 SVG::Graph
 ============
-
-[![Build Status](https://travis-ci.com/lumean/svg-graph2.svg?branch=master)](https://travis-ci.com/lumean/svg-graph2)
+[![Build Status](https://travis-ci.org/lumean/svg-graph2.svg?branch=master)](https://travis-ci.org/lumean/svg-graph2)
 [![Maintainability](https://api.codeclimate.com/v1/badges/0a2b2d977bb9a43f488a/maintainability)](https://codeclimate.com/github/lumean/svg-graph2/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/0a2b2d977bb9a43f488a/test_coverage)](https://codeclimate.com/github/lumean/svg-graph2/test_coverage)
 
