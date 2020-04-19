@@ -21,14 +21,8 @@ describe SVG::Graph::Plot do
     let(:graph) { described_class.new options }
 
     it 'writes an SVG string including credits to SVG::Graph' do
-      projection = [
-       6, 11,    0, 5,   18, 7,   1, 11,   13, 9,   1, 2,   19, 0,   3, 13,
-       7, 9
-      ]
-      actual = [
-       0, 18,    8, 15,    9, 4,   18, 14,   10, 2,   11, 6,  14, 12,
-       15, 6,   4, 17,   2, 12
-      ]
+      projection = Array.new(rand(5..10) * 2) { rand 20 }
+      actual = Array.new(rand(5..10) * 2) { rand 20 }
 
       graph.add_data({
         :data => projection,
