@@ -7,6 +7,7 @@ group :development do
 end
 
 group :test do
+  gem 'faker'
   gem 'rspec'
   gem 'simplecov', '< 0.18', require: false # CodeClimate doesn't support 0.18
 end
