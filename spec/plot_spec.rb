@@ -207,13 +207,10 @@ describe SVG::Graph::Plot do
       end
 
       context 'radius' do
-        let(:descriptions) { Faker::Lorem.words pairs_count } # TODO: we don't need this!
-
         it 'is 10 by default' do
           graph.add_data({
             :data => actual,
             :title => 'Actual',
-            :description => descriptions,
           })
 
           out=graph.burn()
@@ -229,7 +226,6 @@ describe SVG::Graph::Plot do
             graph.add_data({
               :data => actual,
               :title => 'Actual',
-              :description => descriptions,
             })
 
             out=graph.burn()
