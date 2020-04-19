@@ -76,13 +76,6 @@ RSpec.describe DataPoint do
         context 'multiple criteria' do
           let(:shapes) { Faker::Lorem.words words.length }
           let(:criteria) { words.zip(shapes).map {|(word, shape)| [Regexp.new(word), -> (_, _, _) { shape } ] } }
-          # let(:criteria) do
-          #   [
-          #     [/3/, lambda{|x,y,line| "three" }],
-          #     [/2/, lambda{|x,y,line| "two" }],
-          #     [/1/, lambda{|x,y,line| "one" }]
-          #   ]
-          # end
           let(:description) { words.shuffle.join ' ' }
 
           it 'returns the generated shapes in the order of the criteria' do
