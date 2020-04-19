@@ -5,6 +5,10 @@ TODO / Backlog
 == Unreleased
 * Translate tests from Minitest and Test::Unit to RSpec [thanks marnen, #25]
 
+=== 2.2.1 / 2019-11-26
+* Remove inline styling for data point labels and popups [thanks marnen, #23]
+*
+
 === 2.2.0 / 2019-11-26
 * on top of 2.2.0.beta adds the following
 * Fixed Divizion by zero when data is 0,0 in Pie [thanks chrismedrdz, PR #16]

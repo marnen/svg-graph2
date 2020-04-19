@@ -1,9 +1,9 @@
 SVG::Graph
 ============
 
-[![Build Status](https://travis-ci.com/marnen/svg-graph2.svg?branch=master)](https://travis-ci.com/marnen/svg-graph2)
-[![Maintainability](https://api.codeclimate.com/v1/badges/6231f5df83e017fd49fc/maintainability)](https://codeclimate.com/github/marnen/svg-graph2/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/6231f5df83e017fd49fc/test_coverage)](https://codeclimate.com/github/marnen/svg-graph2/test_coverage)
+[![Build Status](https://travis-ci.com/lumean/svg-graph2.svg?branch=master)](https://travis-ci.com/lumean/svg-graph2)
+[![Maintainability](https://api.codeclimate.com/v1/badges/0a2b2d977bb9a43f488a/maintainability)](https://codeclimate.com/github/lumean/svg-graph2/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/0a2b2d977bb9a43f488a/test_coverage)](https://codeclimate.com/github/lumean/svg-graph2/test_coverage)
 
 Description
 -----------
@@ -110,9 +110,6 @@ Source: [C3js.rb](../master/examples/c3js.rb)
 
 [Link to Preview](https://cdn.rawgit.com/lumean/svg-graph2/master/examples/c3js.html)
 
-<iframe src="https://cdn.rawgit.com/lumean/svg-graph2/master/examples/c3js.html" width="600px"> </iframe>
-
-Also have a look at the original [SVG::Graph web page](http://www.germane-software.com/software/SVG/SVG::Graph/), but note that this repository has already added some additional functionality, not available with the original.
 
 Build
 -----
