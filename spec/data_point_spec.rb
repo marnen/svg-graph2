@@ -24,10 +24,14 @@ RSpec.describe DataPoint do
 
     subject { described_class.new(x, y, series).shape *args }
 
-    context 'no description' do
+    shared_examples 'default circle' do
       it 'returns an array containing a circle with the given coordinates, radius 2.5, and the class of the given data series' do
         expect(subject).to be == [default_circle]
       end
+    end
+
+    context 'no description' do
+      include_examples 'default circle'
     end
 
     context 'description' do
@@ -35,9 +39,7 @@ RSpec.describe DataPoint do
       let(:args) { super() + [description] }
 
       context 'no criteria' do
-        it 'returns an array containing a circle with the given coordinates, radius 2.5, and the class of the given data series' do
-          expect(subject).to be == [default_circle]
-        end
+        include_examples 'default circle'
       end
 
       context 'criteria' do
