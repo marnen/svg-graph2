@@ -3,7 +3,7 @@ source "https://rubygems.org"
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
 group :development do
-  gem 'guard-rspec'
+  gem 'guard-rspec', require: false
 end
 
 group :test do
