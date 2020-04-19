@@ -11,20 +11,21 @@ describe SVG::Graph::Plot do
   describe '#burn' do
     let(:options) do
       {
-        :height => 500,
-        :width => 300,
+        :height => rand(400..600),
+        :width => rand(200..400),
         :key => true,
         :scale_x_integers => true,
         :scale_y_integers => true,
       }
     end
     let(:title) { Faker::Lorem.sentence }
+    let(:pairs_count) { rand(5..10) }
     let(:data_params) { {data: data, title: title} }
     let(:graph) { described_class.new(options).tap {|graph| graph.add_data data_params } }
     let(:svg) { graph.burn }
 
     context 'basic smoketest' do
-      let(:data) { Array.new(rand(5..10) * 2) { rand 20 } } # TODO: use pairs_count
+      let(:data) { Array.new(pairs_count * 2) { rand 20 } } # TODO: use pairs_count
 
       it 'writes an SVG string including credits to SVG::Graph' do
         series2 = Array.new(rand(5..10) * 2) { rand 20 }
@@ -47,7 +48,7 @@ describe SVG::Graph::Plot do
       let(:y_range) { min_y_value..max_y_value }
       let(:too_low) { [min_x_value - 1, min_y_value - 1] }
       let(:too_high) { [max_x_value + 1, max_y_value + 1] }
-      let(:data) { (Array.new(rand 2..7) { [rand(x_range), rand(y_range)] } + [too_low, too_high]).shuffle.flatten }
+      let(:data) { (Array.new(pairs_count) { [rand(x_range), rand(y_range)] } + [too_low, too_high]).shuffle.flatten }
 
       let(:options) do
         super().merge(
@@ -66,7 +67,7 @@ describe SVG::Graph::Plot do
     end
 
     context 'polyline connecting data points' do
-      let(:data) { Array.new(rand(5..10) * 2) { rand 20 } }
+      let(:data) { Array.new(pairs_count * 2) { rand 20 } }
 
       context 'default' do
         it 'draws the polyline by default' do
@@ -90,7 +91,6 @@ describe SVG::Graph::Plot do
           :number_format => "%s"
         )
       end
-      let(:pairs_count) { rand(5..10) }
       let(:data) { Array.new(pairs_count * 2) { rand 0.0..20.0 } }
 
       context 'default' do
