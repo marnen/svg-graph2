@@ -9,7 +9,7 @@ RSpec.describe DataPoint do
     let(:x) { rand(50.0..150.0) }
     let(:y) { rand(50.0..150.0) }
     let(:default_radius) { '2.5' }
-    let(:series) { 1 }
+    let(:series) { rand 1..10 }
     let(:css_class) { "dataPoint#{series}" }
     let(:args) { [] }
 
@@ -45,7 +45,6 @@ RSpec.describe DataPoint do
       context 'criteria' do
         let(:width) { rand(1..10).to_s }
         let(:height) { rand(1..10).to_s }
-        let(:series) { 2 }
         let(:words) { Faker::Lorem.words rand(2..5) }
 
         before(:each) { described_class.configure_shape_criteria *criteria }
