@@ -17,15 +17,15 @@ describe SVG::Graph::ErrBar do
       err_mesure = [myarr1_confidence, myarr2_confidence]
 
       graph = SVG::Graph::ErrBar.new(
-        :height => 500,
-        :width => 600,
-        :fields => fields,
-        :errorBars =>err_mesure
+        height: 500,
+        width: 600,
+        fields: fields,
+        errorBars: err_mesure
       )
 
       graph.add_data(
-        :data => data_mesure,
-        :title => 'Sales 2002'
+        data: data_mesure,
+        title: 'Sales 2002'
       )
 
       expect do

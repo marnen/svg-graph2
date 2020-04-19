@@ -11,11 +11,11 @@ describe SVG::Graph::Plot do
   describe '#burn' do
     let(:options) do
       {
-        :height => rand(400..600),
-        :width => rand(200..400),
-        :key => true,
-        :scale_x_integers => true,
-        :scale_y_integers => true,
+        height: rand(400..600),
+        width: rand(200..400),
+        key: true,
+        scale_x_integers: true,
+        scale_y_integers: true,
       }
     end
     let(:title) { Faker::Lorem.sentence }
@@ -31,8 +31,8 @@ describe SVG::Graph::Plot do
         series2 = Array.new(rand(5..10) * 2) { rand 20 }
 
         graph.add_data({
-          :data => series2,
-          :title => Faker::Lorem.sentence
+          data: series2,
+          title: Faker::Lorem.sentence
         })
 
         expect(svg).to match /Created with SVG::Graph/
@@ -52,12 +52,12 @@ describe SVG::Graph::Plot do
 
       let(:options) do
         super().merge(
-          :max_x_value => max_x_value,
-          :max_y_value => max_y_value,
-          :min_x_value => min_x_value,
-          :min_y_value => min_y_value,
-          :scale_x_divisions => 3,
-          :scale_y_divisions => 3
+          max_x_value: max_x_value,
+          max_y_value: max_y_value,
+          min_x_value: min_x_value,
+          min_y_value: min_y_value,
+          scale_x_divisions: 3,
+          scale_y_divisions: 3
         )
       end
 
@@ -87,8 +87,8 @@ describe SVG::Graph::Plot do
     context 'popups' do
       let(:options) do
         super().merge(
-          :add_popups => true,
-          :number_format => "%s"
+          add_popups: true,
+          number_format: "%s"
         )
       end
       let(:data) { Array.new(pairs_count * 2) { rand 0.0..20.0 } }

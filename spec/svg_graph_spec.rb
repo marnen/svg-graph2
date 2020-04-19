@@ -13,13 +13,13 @@ describe 'bar, line, and pie' do
     describe '#burn' do
       it 'writes a graph including credits for SVG::Graph' do
         graph = klass.new(
-          :height => 500,
-          :width => 300,
-          :fields => fields
+          height: 500,
+          width: 300,
+          fields: fields
         )
         graph.add_data(
-          :data => data_sales_02,
-          :title => 'Sales 2002'
+          data: data_sales_02,
+          title: 'Sales 2002'
         )
         expect(graph.burn).to match /Created with SVG::Graph/
       end
@@ -33,24 +33,24 @@ describe '100% pie' do
   let(:data2) { [0, 6, 0, 0, 0] }
   let(:graph) do
     SVG::Graph::Pie.new(
-      :height => 500,
-      :width => 300,
-      :fields => fields,
-      :graph_title => "100% pie",
-      :show_graph_title => true,
-      :show_data_labels => true,
-      :show_x_guidelines => true,
-      :show_x_title => true,
-      :x_title => "Time"
+      height: 500,
+      width: 300,
+      fields: fields,
+      graph_title: "100% pie",
+      show_graph_title: true,
+      show_data_labels: true,
+      show_x_guidelines: true,
+      show_x_title: true,
+      x_title: "Time"
     ).tap do |graph|
       graph.add_data(
-        :data => data1,
-        :title => 'data1'
+        data: data1,
+        title: 'data1'
       )
 
       graph.add_data(
-        :data => data2,
-        :title => 'data2'
+        data: data2,
+        title: 'data2'
       )
     end
   end
