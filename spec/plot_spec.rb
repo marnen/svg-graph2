@@ -39,19 +39,29 @@ describe SVG::Graph::Plot do
     end
 
     context 'plot axis too short' do
+      let(:max_x_value) { rand 10..20 }
+      let(:max_y_value) { rand 10..20 }
+      let(:min_x_value) { rand 2..6 }
+      let(:min_y_value) { rand 2..6 }
+      let(:x_range) { min_x_value..max_x_value }
+      let(:y_range) { min_y_value..max_y_value }
+      let(:too_low) { [min_x_value - 1, min_y_value - 1] }
+      let(:too_high) { [max_x_value + 1, max_y_value + 1] }
+      let(:data) { (Array.new(rand 2..7) { [rand(x_range), rand(y_range)] } + [too_low, too_high]).shuffle.flatten }
+
       let(:options) do
         super().merge(
-          :max_x_value => 9,
-          :max_y_value => 9,
-          :min_x_value => 6,
-          :min_y_value => 6,
+          :max_x_value => max_x_value,
+          :max_y_value => max_y_value,
+          :min_x_value => min_x_value,
+          :min_y_value => min_y_value,
           :scale_x_divisions => 3,
           :scale_y_divisions => 3
         )
       end
       it 'still writes a graph' do
         graph.add_data({
-          :data => [5,5,  12,12,  6,6,  9,9,  7,7,  10,10],
+          :data => data,
           :title => '10',
         })
 
@@ -60,13 +70,10 @@ describe SVG::Graph::Plot do
     end
 
     context 'polyline connecting data points' do
+      let(:actual) { Array.new(rand(5..10) * 2) { rand 20 } }
+
       context 'default' do
         it 'draws the polyline by default' do
-          actual = [
-            0, 18,    8, 15,    9, 4,   18, 14,   10, 2,   11, 6,  14, 12,
-            15, 6,   4, 17,   2, 12
-          ]
-
           graph.add_data({
             :data => actual,
             :title => 'Actual',
@@ -79,11 +86,6 @@ describe SVG::Graph::Plot do
         let(:options) { super().merge show_lines: false }
 
         it 'does not draw the polyline' do
-          actual = [
-            0, 18,    8, 15,    9, 4,   18, 14,   10, 2,   11, 6,  14, 12,
-            15, 6,   4, 17,   2, 12
-          ]
-
           graph.add_data({
             :data => actual,
             :title => 'Actual',
@@ -101,13 +103,11 @@ describe SVG::Graph::Plot do
           :number_format => "%s"
         )
       end
+      let(:pairs_count) { rand(5..10) }
+      let(:actual) { Array.new(pairs_count * 2) { rand 0.0..20.0 } }
 
       context 'default' do
         it 'rounds the values to integer by default' do
-          actual = [
-            0.1, 18,    8.55, 15.1234,    9.09876765, 4,
-          ]
-
           graph.add_data({
             :data => actual,
             :title => 'Actual',
@@ -115,13 +115,10 @@ describe SVG::Graph::Plot do
 
           out=graph.burn()
           File.write(File.expand_path("plot_#{__method__}.svg", __dir__), out)
-          [
-            ['(0.1, 18)', '(0, 18)'],
-            ['(8.55, 15.1234)', '(9, 15)'], # round up
-            ['(9.09876765, 4)', '(9, 4)']
-          ].each do |unrounded, rounded|
-            expect(out).not_to include unrounded
-            expect(out).to include rounded
+
+          actual.each_slice(2) do |(x, y)|
+            expect(out).not_to include "(#{x}, #{y})"
+            expect(out).to include "(#{x.round}, #{y.round})"
           end
         end
       end
@@ -129,11 +126,7 @@ describe SVG::Graph::Plot do
       context ':round_popups is false' do
         let(:options) { super().merge round_popups: false }
 
-        it 'preserves decimal values if :round_popups is false' do
-          actual = [
-            0.1, 18,    8.55, 15.1234,    9.09876765, 4,
-          ]
-
+        it 'preserves decimal values' do
           graph.add_data({
             :data => actual,
             :title => 'Actual',
@@ -142,23 +135,63 @@ describe SVG::Graph::Plot do
           out=graph.burn()
           File.write(File.expand_path("plot_#{__method__}.svg", __dir__), out)
 
-          [
-            ['(0.1, 18)', '(0, 18)'],
-            ['(8.55, 15.1234)', '(9, 15)'], # round up
-            ['(9.09876765, 4)', '(9, 4)']
-          ].each do |unrounded, rounded|
-            expect(out).to include unrounded
-            expect(out).not_to include rounded
+          actual.each_slice(2) do |(x, y)|
+            expect(out).to include "(#{x}, #{y})"
+            expect(out).not_to include "(#{x.round}, #{y.round})"
           end
         end
 
         it 'shows text descriptions if provided' do
-          actual = [
-            8.55, 15.1234,    9.09876765, 4,     0.1, 18,
-          ]
+          descriptions = Faker::Lorem.words pairs_count
+
+          graph.add_data({
+            :data => actual,
+            :title => 'Actual',
+            :description => descriptions.dup, # TODO: apparently the :description argument gets altered! This should be fixed...
+          })
+
+          out=graph.burn()
+          File.write(File.expand_path("plot_#{__method__}.svg", __dir__), out)
+
+          actual.each_slice(2).with_index do |(x, y), index|
+            expect(out).to include "(#{x}, #{y}, #{descriptions[index]})"
+            expect(out).not_to include "(#{x}, #{y})"
+          end
+        end
+      end
+
+      context ':number_format not given' do
+        let(:options) { super().tap {|options| options.delete :number_format } }
+        let(:pairs_count) { 3 } # TODO: get rid of this when refactor the one spec in this context
+
+        it 'combines different shapes based on the descriptions given' do
+          # TODO: does this spec belong here, or should it be in DataPoint, or an integration spec?
+          # TODO: wherever this goes, we should clean it up a bit.
+
           description = [
-           'first',    'second',          'third',
+           'one is a circle',     'two is a rectangle',           'three is a rectangle with strikethrough',
           ]
+
+          # multiple array of the form
+          # [ regex ,
+          #   lambda taking three arguments (x,y, line_number for css)
+          #     -> return value of the lambda must be an array: [svg tag name,  Hash with keys "points" and "class"]
+          # ]
+          DataPoint.configure_shape_criteria(
+            [/^t.*/, lambda{|x,y,line| ['polygon', {
+                "points" => "#{x-1.5},#{y+2.5} #{x+1.5},#{y+2.5} #{x+1.5},#{y-2.5} #{x-1.5},#{y-2.5}",
+                "class" => "dataPoint#{line}"
+              }]
+            }],
+            [/^three.*/, lambda{|x,y,line| ['line', {
+                "x1" => "#{x-4}",
+                "y1" => y.to_s,
+                "x2" => "#{x+4}",
+                "y2" => y.to_s,
+                "class" => "axis"
+              }]
+            },"OVERLAY"],
+          )
 
           graph.add_data({
             :data => actual,
@@ -168,102 +201,40 @@ describe SVG::Graph::Plot do
 
           out=graph.burn()
           File.write(File.expand_path("plot_#{__method__}.svg", __dir__), out)
-          [
-            ['(8.55, 15.1234, first)', '(8.55, 15.1234)'],
-            ['(9.09876765, 4, second)', '(9.09876765, 4)'],
-            ['(0.1, 18, third)', '(0.1, 18)']
-          ].each do |with_string, without_string|
-            expect(out).to include with_string
-            expect(out).not_to include without_string
-          end
+          expect(out).to match /polygon.*points/
+          expect(out).to match /line.*axis/
+        end
+      end
+
+      context 'radius' do
+        let(:descriptions) { Faker::Lorem.words pairs_count } # TODO: we don't need this!
+
+        it 'is 10 by default' do
+          graph.add_data({
+            :data => actual,
+            :title => 'Actual',
+            :description => descriptions,
+          })
+
+          out=graph.burn()
+          expect(out).to match /circle .*r='10'/
+          expect(out).to match /circle .*onmouseover=.*/
         end
 
-        context ':number_format not given' do
-          let(:options) { super().tap {|options| options.delete :number_format } }
+        context ':popup_radius is specified' do
+          let(:popup_radius) { rand(1.0..3.0) }
+          let(:options) { super().merge popup_radius: popup_radius }
 
-          it 'combines different shapes based on the descriptions given' do
-            actual = [
-             8.55, 15.1234,         9.09876765, 4,                  2.1, 18,
-            ]
-            description = [
-             'one is a circle',     'two is a rectangle',           'three is a rectangle with strikethrough',
-            ]
-
-            # multiple array of the form
-            # [ regex ,
-            #   lambda taking three arguments (x,y, line_number for css)
-            #     -> return value of the lambda must be an array: [svg tag name,  Hash with keys "points" and "class"]
-            # ]
-            DataPoint.configure_shape_criteria(
-              [/^t.*/, lambda{|x,y,line| ['polygon', {
-                  "points" => "#{x-1.5},#{y+2.5} #{x+1.5},#{y+2.5} #{x+1.5},#{y-2.5} #{x-1.5},#{y-2.5}",
-                  "class" => "dataPoint#{line}"
-                }]
-              }],
-              [/^three.*/, lambda{|x,y,line| ['line', {
-                  "x1" => "#{x-4}",
-                  "y1" => y.to_s,
-                  "x2" => "#{x+4}",
-                  "y2" => y.to_s,
-                  "class" => "axis"
-                }]
-              },"OVERLAY"],
-            )
-
+          it 'is the value of :popup_radius' do
             graph.add_data({
               :data => actual,
               :title => 'Actual',
-              :description => description,
+              :description => descriptions,
             })
 
             out=graph.burn()
-            File.write(File.expand_path("plot_#{__method__}.svg", __dir__), out)
-            expect(out).to match /polygon.*points/
-            expect(out).to match /line.*axis/
-          end
-        end
-
-        context 'radius' do
-          it 'is 10 by default' do
-            actual = [
-             1, 1,    5, 5,     10, 10,
-            ]
-            description = [
-             'first',    'second',          'third',
-            ]
-
-            graph.add_data({
-              :data => actual,
-              :title => 'Actual',
-              :description => description,
-            })
-
-            out=graph.burn()
-            expect(out).to match /circle .*r='10'/
+            expect(out).to match /circle .*r='#{Regexp.escape popup_radius.to_s}'/
             expect(out).to match /circle .*onmouseover=.*/
-          end
-
-          context ':popup_radius is specified' do
-            let(:options) { super().merge popup_radius: 1.23 }
-
-            it 'is the value of :popup_radius' do
-              actual = [
-               1, 1,    5, 5,     10, 10,
-              ]
-              description = [
-               'first',    'second',          'third',
-              ]
-
-              graph.add_data({
-                :data => actual,
-                :title => 'Actual',
-                :description => description,
-              })
-
-              out=graph.burn()
-              expect(out).to match /circle .*r='1.23'/
-              expect(out).to match /circle .*onmouseover=.*/
-            end
           end
         end
       end
