@@ -9,5 +9,6 @@ end
 group :test do
   gem 'faker'
   gem 'rspec'
+  gem 'rspec-its'  # TODO: consider removing its and writing better descriptions instead.
   gem 'simplecov', '< 0.18', require: false # CodeClimate doesn't support 0.18
 end
