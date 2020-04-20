@@ -16,8 +16,8 @@ describe SVG::Graph::Graph do
       end
     end
   end
-
-  let(:graph) { dummy_graph.new({})}
+  let(:config) { {} }
+  let(:graph) { dummy_graph.new(config)}
 
   describe 'constructor' do
     subject { graph }
@@ -67,20 +67,70 @@ describe SVG::Graph::Graph do
     end
   end
 
-  describe '#clear_data' do
+  context 'operations on graphs with data' do
     let(:graph) { super().tap {|graph| graph.add_data data: Faker::Lorem.words } }
 
-    it 'clears the data' do
-      graph.clear_data
-      expect { graph.burn }.to raise_error 'No data available'
+    describe '#clear_data' do
+      it 'clears the data' do
+        graph.clear_data
+        expect { graph.burn }.to raise_error 'No data available'
+      end
     end
-  end
 
-  describe '#to_iruby' do
-    let(:graph) { super().tap {|graph| graph.add_data data: [1, 2, 3] } }
+    context 'SVG output' do
+      let(:xml) { REXML::Document.new subject }
 
-    it 'returns an HTML MIME type identifier and the SVG content of the graph' do
-      expect(graph.to_iruby).to be == ['text/html', graph.burn_svg_only]
+      describe '#burn' do
+        subject { graph.burn }
+
+        shared_examples 'basic SVG document' do
+          it 'returns an XML document' do
+            expect(subject).to start_with REXML::XMLDecl.new.to_s
+          end
+
+          it 'uses the SVG 1.0 doctype' do
+            expect(xml.doctype.to_s).to be == REXML::DocType.new(['svg', REXML::DocType::PUBLIC, '-//W3C//DTD SVG 1.0//EN', 'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd']).to_s
+          end
+
+          it 'contains an <svg> element as root' do
+            expect(xml.root.name).to be == 'svg'
+          end
+        end
+
+        context 'not compressed' do
+          include_examples 'basic SVG document'
+        end
+
+        context 'compressed', pending: 'looks like the zip data may not be written correctly' do
+          let(:config) { super().merge compress: true }
+
+          subject { Zlib::Inflate.inflate super() }
+
+          include_examples 'basic SVG document'
+        end
+      end
+
+      describe '#burn_svg_only' do
+        subject { graph.burn_svg_only }
+
+        it 'contains an <svg> element as root' do
+          expect(xml.root.name).to be == 'svg'
+        end
+
+        it 'does not contain an XML declaration' do
+          expect(subject).not_to include '?xml'
+        end
+
+        it 'does not contain a doctype declaration' do
+          expect(subject).not_to include 'DOCTYPE'
+        end
+      end
+    end
+
+    describe '#to_iruby' do
+      it 'returns an HTML MIME type identifier and the SVG content of the graph' do
+        expect(graph.to_iruby).to be == ['text/html', graph.burn_svg_only]
+      end
     end
   end
 end
