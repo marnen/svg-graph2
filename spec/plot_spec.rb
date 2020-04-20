@@ -3,8 +3,6 @@ require 'spec_helper'
 require_relative '../lib/SVG/Graph/Plot'
 require_relative '../lib/SVG/Graph/DataPoint'
 
-# TODO: this file needs a lot of work!
-
 describe SVG::Graph::Plot do
   before(:each) { DataPoint.reset_shape_criteria }
 
