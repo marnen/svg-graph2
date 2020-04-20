@@ -67,6 +67,15 @@ describe SVG::Graph::Graph do
     end
   end
 
+  describe '#clear_data' do
+    let(:graph) { super().tap {|graph| graph.add_data data: Faker::Lorem.words } }
+
+    it 'clears the data' do
+      graph.clear_data
+      expect { graph.burn }.to raise_error 'No data available'
+    end
+  end
+
   describe '#to_iruby' do
     let(:graph) { super().tap {|graph| graph.add_data data: [1, 2, 3] } }
 
