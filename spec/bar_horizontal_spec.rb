@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 require_relative '../lib/SVG/Graph/BarHorizontal'
+require_relative 'shared_examples/burn_svg_only'
 
 describe SVG::Graph::BarHorizontal do
   context '#burn_svg_only' do
@@ -47,6 +48,8 @@ describe SVG::Graph::BarHorizontal do
         })
       end
     end
+
+    include_examples 'burn_svg_only'
 
     it 'can write a coherent SVG file' do
       # graph.burn            # this returns a full valid xml document containing the graph

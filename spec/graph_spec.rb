@@ -2,6 +2,7 @@ require 'spec_helper'
 
 require_relative '../lib/svggraph'
 require_relative 'shared_examples/all_add_data'
+require_relative 'shared_examples/burn_svg_only'
 
 describe SVG::Graph::Graph do
   let(:dummy_graph) do
@@ -41,7 +42,7 @@ describe SVG::Graph::Graph do
     end
 
     context 'SVG output' do
-      let(:xml) { REXML::Document.new subject }
+      let(:svg) { REXML::Document.new subject }
 
       describe '#burn' do
         subject { graph.burn }
@@ -52,11 +53,11 @@ describe SVG::Graph::Graph do
           end
 
           it 'uses the SVG 1.0 doctype' do
-            expect(xml.doctype.to_s).to be == REXML::DocType.new(['svg', REXML::DocType::PUBLIC, '-//W3C//DTD SVG 1.0//EN', 'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd']).to_s
+            expect(svg.doctype.to_s).to be == REXML::DocType.new(['svg', REXML::DocType::PUBLIC, '-//W3C//DTD SVG 1.0//EN', 'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd']).to_s
           end
 
           it 'contains an <svg> element as root' do
-            expect(xml.root.name).to be == 'svg'
+            expect(svg.root.name).to be == 'svg'
           end
         end
 
@@ -74,19 +75,7 @@ describe SVG::Graph::Graph do
       end
 
       describe '#burn_svg_only' do
-        subject { graph.burn_svg_only }
-
-        it 'contains an <svg> element as root' do
-          expect(xml.root.name).to be == 'svg'
-        end
-
-        it 'does not contain an XML declaration' do
-          expect(subject).not_to include '?xml'
-        end
-
-        it 'does not contain a doctype declaration' do
-          expect(subject).not_to include 'DOCTYPE'
-        end
+        include_examples 'burn_svg_only'
       end
     end
 
