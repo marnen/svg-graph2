@@ -9,7 +9,7 @@ RSpec.shared_examples 'all add_data' do
     let(:even_number) { rand(2..5) * 2 }
 
     context 'no :data key' do
-      let(:params) { Hash[*Faker::Lorem.words(even_number)] }
+      let(:params) { Hash[*Faker::Lorem.words(number: even_number)] }
       include_examples 'invalid data'
     end
 
@@ -24,7 +24,7 @@ RSpec.shared_examples 'all add_data' do
     end
 
     context 'valid data: :data key with array' do
-      let(:params) { {data: Faker::Lorem.words(even_number)} }
+      let(:params) { {data: Faker::Lorem.words(number: even_number)} }
 
       it 'succeeds' do
         expect { graph.add_data params}.not_to raise_error
@@ -37,7 +37,7 @@ RSpec.shared_examples 'all add_data' do
   end
 
   context 'starting with data already added' do
-    let(:graph) { super().tap {|graph| graph.add_data data: Faker::Lorem.words(even_number) } }
+    let(:graph) { super().tap {|graph| graph.add_data data: Faker::Lorem.words(number: even_number) } }
     include_examples 'add_data'
   end
 end

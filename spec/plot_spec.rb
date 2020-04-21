@@ -31,7 +31,7 @@ describe SVG::Graph::Plot do
     include_examples 'all add_data'
 
     context 'array of pairs' do
-      let(:data) { Array.new(odd_number) { Faker::Lorem.words 2} }
+      let(:data) { Array.new(odd_number) { Faker::Lorem.words number: 2} }
 
       it 'succeeds even with an odd number of pairs' do
         expect { graph.add_data params }.not_to raise_error
@@ -39,7 +39,7 @@ describe SVG::Graph::Plot do
     end
 
     context 'odd array length' do
-      let(:data) { Faker::Lorem.words(odd_number) }
+      let(:data) { Faker::Lorem.words(number: odd_number) }
 
       it 'raises an error' do
         expect { graph.add_data params }.to raise_error /contained an odd set of data points/
@@ -47,8 +47,8 @@ describe SVG::Graph::Plot do
     end
 
     context 'description' do
-      let(:data) { Faker::Lorem.words(pairs_count * 2) }
-      let(:description) { Faker::Lorem.words description_count }
+      let(:data) { Faker::Lorem.words(number: pairs_count * 2) }
+      let(:description) { Faker::Lorem.words number: description_count }
       let(:params) { {data: data, description: description} }
 
       shared_examples 'invalid data' do
@@ -191,7 +191,7 @@ describe SVG::Graph::Plot do
         end
 
         context 'text descriptions provided' do
-          let(:descriptions) { Faker::Lorem.words pairs_count }
+          let(:descriptions) { Faker::Lorem.words number: pairs_count }
           let(:data_params) { super().merge description: descriptions.dup } # TODO: apparently the :description argument gets altered! This should be fixed...
 
           it 'shows text descriptions if provided' do

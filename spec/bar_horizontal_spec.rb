@@ -10,7 +10,7 @@ describe SVG::Graph::BarHorizontal do
     let(:height) { rand 400..500 }
     let(:length) { rand 5..8 }
     let(:x_title) { Faker::Lorem.sentence }
-    let(:y_axis) { Faker::Lorem.words length }
+    let(:y_axis) { Faker::Lorem.words number: length }
     let(:y_title) { Faker::Lorem.sentence }
 
     let(:options) do

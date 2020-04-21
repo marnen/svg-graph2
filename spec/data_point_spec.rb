@@ -45,7 +45,7 @@ RSpec.describe DataPoint do
       context 'criteria' do
         let(:width) { rand(1..10).to_s }
         let(:height) { rand(1..10).to_s }
-        let(:words) { Faker::Lorem.words rand(2..5) }
+        let(:words) { Faker::Lorem.words number: rand(2..5) }
 
         before(:each) { described_class.configure_shape_criteria *criteria }
 
@@ -74,7 +74,7 @@ RSpec.describe DataPoint do
         end
 
         context 'multiple criteria' do
-          let(:shapes) { Faker::Lorem.words words.length }
+          let(:shapes) { Faker::Lorem.words number: words.length }
           let(:criteria) { words.zip(shapes).map {|(word, shape)| [Regexp.new(word), -> (_, _, _) { shape } ] } }
           let(:description) { words.shuffle.join ' ' }
 
