@@ -5,25 +5,30 @@ require_relative 'shared_examples/burn_svg_only'
 
 describe SVG::Graph::BarHorizontal do
   context '#burn_svg_only' do
+    let(:graph_title) { 'kg per head and year chocolate consumption' }
+    let(:width) { 640 }
+    let(:height) { 500 }
+    let(:x_title) { 'kg/year' }
     let(:y_axis) { ['1-10', '10-30', '30-50', '50-70', 'older'] }
+    let(:y_title) { 'Age in years' }
 
     let(:options) do
       {
-        width: 640,
-        height: 500,
+        width: width,
+        height: height,
         stack: :side,  # the stack option is valid for Bar graphs only
         fields: y_axis,
-        graph_title: "kg per head and year chocolate consumption",
+        graph_title: graph_title,
         show_graph_title: true,
         show_x_title: true,
-        x_title: 'kg/year',
+        x_title: x_title,
         rotate_x_labels: false,
         #scale_divisions: 1,
         scale_integers: true,
         x_title_location: :end,
         show_y_title: true,
         rotate_y_labels: false,
-        y_title: 'Age in years',
+        y_title: y_title,
         y_title_location: :end,
         add_popups: true,
         no_css: true,
@@ -55,6 +60,20 @@ describe SVG::Graph::BarHorizontal do
       expect { File.open(File.expand_path('bar_horizontal.svg',__dir__), 'w') {|f| f.write(graph.burn_svg_only)} }.not_to raise_error
     end
 
+    context 'dimensions' do
+      it 'draws the graph to the specified dimensions' do
+        root = svg.first 'svg'
+        expect(root[:width].to_i).to be == width
+        expect(root[:height].to_i).to be == height
+      end
+    end
+
+    context 'title' do
+      it 'draws the graph title' do
+        expect(svg).to have_selector 'text', text: graph_title
+      end
+    end
+
     context 'legend' do
       it 'draws a legend entry for each series' do
         series.each.with_index(1) do |series, index|
@@ -63,11 +82,31 @@ describe SVG::Graph::BarHorizontal do
       end
     end
 
+    context 'x axis' do
+      it 'draws the axis title' do
+        expect(svg).to have_selector 'text.xAxisTitle', text: x_title
+      end
+
+      it 'draws axis labels' do
+        expect(svg).to have_selector 'text.xAxisLabels'
+      end
+    end
+
     context 'y axis' do
+      it 'draws the axis title' do
+        expect(svg).to have_selector 'text.yAxisTitle', text: y_title
+      end
+
       it 'draws the given field names on the y axis' do
         svg.all('text.yAxisLabels').each.with_index do |label, index|
           expect(label.text).to be == y_axis[index]
         end
+      end
+    end
+
+    context 'guidelines' do
+      it 'draws guidelines' do
+        expect(svg).to have_selector 'path.guideLines'
       end
     end
 
