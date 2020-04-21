@@ -26,7 +26,6 @@ describe SVG::Graph::BarHorizontal do
         x_title_location: :end,
         y_title: y_title,
         y_title_location: :end,
-        add_popups: true,
         no_css: true,
         bar_gap: true
       }
@@ -190,75 +189,97 @@ describe SVG::Graph::BarHorizontal do
         end
       end
 
-      context ':show_percent and :show_actual_values' do
-        let(:selectors) { ['text.dataPointLabel', 'text.dataPointLabelBackground'] }
+      context 'labels and popups' do
+        shared_examples ':show_percent and :show_actual_values' do |selector_or_array|
+          context do
+            let(:selectors) { Array selector_or_array }
 
-        context ':show_percent is true' do
-          let(:options) { super().merge show_percent: true }
+            context ':show_percent is true' do
+              let(:options) { super().merge show_percent: true }
 
-          context ':show_actual_values is false' do
-            let(:options) { super().merge show_actual_values: false }
+              context ':show_actual_values is false' do
+                let(:options) { super().merge show_actual_values: false }
 
-            it 'labels each bar with percentage only' do
-              each_series_by_value do |value, total|
-                selectors.each do |selector|
-                  expect(svg).to have_selector selector, text: /^\s*#{Regexp.escape percentage(value, total)}\s*$/
+                it 'displays percentage only for each bar' do
+                  each_series_by_value do |value, total|
+                    selectors.each do |selector|
+                      expect(svg).to have_selector selector, text: /^\s*#{Regexp.escape percentage(value, total)}\s*$/
+                    end
+                  end
+                end
+              end
+
+              context 'otherwise' do
+                it 'displays value (to 2 decimal places) and rounded percentage for each bar' do
+                  each_series_by_value do |value, total|
+                    selectors.each do |selector|
+                      expect(svg).to have_selector selector, text: /^\s*#{Regexp.escape "#{formatted_value value} #{percentage value, total}"}\s*$/
+                    end
+                  end
                 end
               end
             end
+
+            context 'otherwise' do
+              context ':show_actual_values is false' do
+                let(:options) { super().merge show_actual_values: false }
+
+                it 'does not display any text' do
+                  selectors.each do |selector|
+                    expect(svg).not_to have_selector selector, text: /\S/
+                  end
+                end
+              end
+
+              context 'otherwise' do
+                it 'displays values only (to 2 decimal places) for each bar' do
+                  each_series_by_value do |value, total|
+                    selectors.each do |selector|
+                      expect(svg).to have_selector selector, text: /^\s*#{Regexp.escape formatted_value(value)}$/
+                    end
+                  end
+                end
+              end
+            end
+
+            private
+
+            def each_series_by_value(&block)
+              series.each do |series|
+                data = series[:data]
+                total = data.inject(:+).to_f
+                data.each do |value|
+                  block.call value, total
+                end
+              end
+            end
+
+            def formatted_value(value)
+              "%.2f" % value
+            end
+
+            def percentage(value, total)
+              "(%d%%)" % (100 * value / total).round
+            end
+          end
+        end
+
+        context 'labels' do
+          include_examples ':show_percent and :show_actual_values', ['text.dataPointLabel', 'text.dataPointLabelBackground']
+        end
+
+        context 'popups' do
+          context ':add_popups is true' do
+            let(:options) { super().merge add_popups: true }
+
+            include_examples ':show_percent and :show_actual_values', 'text.dataPointPopup'
           end
 
           context 'otherwise' do
-            it 'labels each bar with value (to 2 decimal places) and rounded percentage' do
-              each_series_by_value do |value, total|
-                selectors.each do |selector|
-                  expect(svg).to have_selector selector, text: /^\s*#{Regexp.escape "#{formatted_value value} #{percentage value, total}"}\s*$/
-                end
-              end
+            it 'does not draw popups' do
+              expect(svg).not_to have_selector 'text.dataPointPopup'
             end
           end
-        end
-
-        context 'otherwise' do
-          context ':show_actual_values is false' do
-            let(:options) { super().merge show_actual_values: false }
-
-            it 'does not label the bars' do
-              selectors.each do |selector|
-                expect(svg).not_to have_selector selector, text: /\S/
-              end
-            end
-          end
-
-          context 'otherwise' do
-            it 'labels the bars with values only (to 2 decimal places)' do
-              each_series_by_value do |value, total|
-                selectors.each do |selector|
-                  expect(svg).to have_selector selector, text: /^\s*#{Regexp.escape formatted_value(value)}$/
-                end
-              end
-            end
-          end
-        end
-
-        private
-
-        def each_series_by_value(&block)
-          series.each do |series|
-            data = series[:data]
-            total = data.inject(:+).to_f
-            data.each do |value|
-              block.call value, total
-            end
-          end
-        end
-
-        def formatted_value(value)
-          "%.2f" % value
-        end
-
-        def percentage(value, total)
-          "(%d%%)" % (100 * value / total).round
         end
       end
     end
