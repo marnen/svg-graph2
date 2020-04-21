@@ -223,7 +223,7 @@ describe SVG::Graph::BarHorizontal do
                 it 'displays percentage only for each bar' do
                   each_series_by_value do |value, total|
                     selectors.each do |selector|
-                      expect(svg).to have_selector selector, text: /^\s*#{Regexp.escape percentage(value, total)}\s*$/
+                      expect(svg).to have_selector selector, exact_text: percentage(value, total), normalize_ws: true
                     end
                   end
                 end
@@ -233,7 +233,7 @@ describe SVG::Graph::BarHorizontal do
                 it 'displays value (to 2 decimal places) and rounded percentage for each bar' do
                   each_series_by_value do |value, total|
                     selectors.each do |selector|
-                      expect(svg).to have_selector selector, text: /^\s*#{Regexp.escape "#{formatted_value value} #{percentage value, total}"}\s*$/
+                      expect(svg).to have_selector selector, exact_text: "#{formatted_value value} #{percentage value, total}"
                     end
                   end
                 end
@@ -255,7 +255,7 @@ describe SVG::Graph::BarHorizontal do
                 it 'displays values only (to 2 decimal places) for each bar' do
                   each_series_by_value do |value, total|
                     selectors.each do |selector|
-                      expect(svg).to have_selector selector, text: /^\s*#{Regexp.escape formatted_value(value)}$/
+                      expect(svg).to have_selector selector, exact_text: formatted_value(value)
                     end
                   end
                 end
@@ -267,7 +267,7 @@ describe SVG::Graph::BarHorizontal do
             def each_series_by_value(&block)
               series.each do |series|
                 data = series[:data]
-                total = data.inject(:+).to_f
+                total = data.sum.to_f
                 data.each do |value|
                   block.call value, total
                 end
