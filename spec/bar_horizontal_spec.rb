@@ -20,29 +20,24 @@ describe SVG::Graph::BarHorizontal do
         stack: :side,  # the stack option is valid for Bar graphs only
         fields: y_axis,
         graph_title: graph_title,
-        show_graph_title: true,
-        show_x_title: true,
         x_title: x_title,
         rotate_x_labels: false,
         #scale_divisions: 1,
         scale_integers: true,
         x_title_location: :end,
-        show_y_title: true,
         rotate_y_labels: false,
         y_title: y_title,
         y_title_location: :end,
         add_popups: true,
         no_css: true,
-        bar_gap: true,
-        show_percent: true,
-        show_actual_values: true
+        bar_gap: true
       }
     end
 
     let(:series_count) { rand 2..4 }
     let(:series) do
       Array.new(series_count) do
-        {data: Array.new(length) { rand(0.0..10.0).send [:to_f, :to_i].sample }, title: Faker::Lorem.word}
+        {data: Array.new(length) { rand(1.0..10.0).send [:to_f, :to_i].sample }, title: Faker::Lorem.word}
       end
     end
 
@@ -71,37 +66,91 @@ describe SVG::Graph::BarHorizontal do
     end
 
     context 'title' do
-      it 'draws the graph title' do
-        expect(svg).to have_selector 'text', text: graph_title
-      end
-    end
+      context ':show_graph_title is true' do
+        let(:options) { super().merge show_graph_title: true }
 
-    context 'legend' do
-      it 'draws a legend entry for each series' do
-        series.each.with_index(1) do |series, index|
-          expect(svg).to have_css "rect.key#{index} + text.keyText", text: series[:title]
+        it 'draws the graph title' do
+          expect(svg).to have_selector 'text', text: graph_title
+        end
+      end
+
+      context 'otherwise' do
+        it 'does not draw the graph title' do
+          expect(svg).not_to have_selector 'text', text: graph_title
         end
       end
     end
 
-    context 'x axis' do
-      it 'draws the axis title' do
-        expect(svg).to have_selector 'text.xAxisTitle', text: x_title
+    context 'legend' do
+      context ':key is false' do
+        let(:options) { super().merge key: false }
+
+        it 'does not draw a legend' do
+          (1..series_count).each {|index| expect(svg).not_to have_selector ".key#{index}" }
+          expect(svg).not_to have_selector '.keyText'
+        end
       end
 
-      it 'draws axis labels' do
-        expect(svg).to have_selector 'text.xAxisLabels'
+
+      context 'otherwise' do
+        it 'draws a legend entry for each series' do
+          series.each.with_index(1) do |series, index|
+            expect(svg).to have_css "rect.key#{index} + text.keyText", text: series[:title]
+          end
+        end
       end
     end
 
-    context 'y axis' do
-      it 'draws the axis title' do
-        expect(svg).to have_selector 'text.yAxisTitle', text: y_title
+    context 'axes' do
+      shared_examples 'axis options' do |axis|
+        context ":show_#{axis}_title" do
+          let(:selector) { "text.#{axis}AxisTitle" }
+
+          context 'true' do
+            let(:options) { super().merge :"show_#{axis}_title" => true }
+
+            it 'draws the axis title' do
+              expect(svg).to have_selector selector, text: self.send("#{axis}_title")
+            end
+          end
+
+          context 'otherwise' do
+            it 'does not draw the axis title' do
+              expect(svg).not_to have_selector selector
+            end
+          end
+        end
+
+        context ":show_#{axis}_labels" do
+          let(:selector) { "text.#{axis}AxisLabels" }
+
+          context 'false' do
+            let(:options) { super().merge :"show_#{axis}_labels" => false }
+
+            it 'does not draw axis labels' do
+              expect(svg).not_to have_selector selector
+            end
+          end
+
+          context 'otherwise' do
+            it 'draws axis labels' do
+              expect(svg).to have_selector selector
+            end
+          end
+        end
       end
 
-      it 'draws the given field names on the y axis' do
-        svg.all('text.yAxisLabels').each.with_index do |label, index|
-          expect(label.text).to be == y_axis[index]
+      context 'x axis' do
+        include_examples 'axis options', 'x'
+      end
+
+      context 'y axis' do
+        include_examples 'axis options', 'y'
+
+        it 'draws the given field names on the y axis' do
+          svg.all('text.yAxisLabels').each.with_index do |label, index|
+            expect(label.text).to be == y_axis[index]
+          end
         end
       end
     end
@@ -114,7 +163,7 @@ describe SVG::Graph::BarHorizontal do
 
     context 'data bars' do
       it 'draws proportional bars for each series' do
-        epsilon = 1e-14
+        epsilon = 1e-13
         series.each.with_index(1) do |series, index|
           bars = svg.all "rect.fill#{index}"
           scale_factor = bars.first[:width].to_f / series[:data].first
@@ -125,15 +174,75 @@ describe SVG::Graph::BarHorizontal do
         end
       end
 
-      it 'labels each bar with value (to 2 decimal places) and rounded percentage' do
-        series.each do |series|
-          data = series[:data]
-          total = data.inject(:+).to_f
-          data.each do |value|
-            ['text.dataPointLabel', 'text.dataPointLabelBackground'].each do |selector|
-              expect(svg).to have_selector selector, text: "#{"%.2f" % value} (#{"%d%%" % (100 * value / total).round})"
+      context ':show_percent and :show_actual_values' do
+        let(:selectors) { ['text.dataPointLabel', 'text.dataPointLabelBackground'] }
+
+        context ':show_percent is true' do
+          let(:options) { super().merge show_percent: true }
+
+          context ':show_actual_values is false' do
+            let(:options) { super().merge show_actual_values: false }
+
+            it 'labels each bar with percentage only' do
+              each_series_by_value do |value, total|
+                selectors.each do |selector|
+                  expect(svg).to have_selector selector, text: /^\s*#{Regexp.escape percentage(value, total)}\s*$/
+                end
+              end
             end
           end
+
+          context 'otherwise' do
+            it 'labels each bar with value (to 2 decimal places) and rounded percentage' do
+              each_series_by_value do |value, total|
+                selectors.each do |selector|
+                  expect(svg).to have_selector selector, text: /^\s*#{Regexp.escape "#{formatted_value value} #{percentage value, total}"}\s*$/
+                end
+              end
+            end
+          end
+        end
+
+        context 'otherwise' do
+          context ':show_actual_values is false' do
+            let(:options) { super().merge show_actual_values: false }
+
+            it 'does not label the bars' do
+              selectors.each do |selector|
+                expect(svg).not_to have_selector selector, text: /\S/
+              end
+            end
+          end
+
+          context 'otherwise' do
+            it 'labels the bars with values only (to 2 decimal places)' do
+              each_series_by_value do |value, total|
+                selectors.each do |selector|
+                  expect(svg).to have_selector selector, text: /^\s*#{Regexp.escape formatted_value(value)}$/
+                end
+              end
+            end
+          end
+        end
+
+        private
+
+        def each_series_by_value(&block)
+          series.each do |series|
+            data = series[:data]
+            total = data.inject(:+).to_f
+            data.each do |value|
+              block.call value, total
+            end
+          end
+        end
+
+        def formatted_value(value)
+          "%.2f" % value
+        end
+
+        def percentage(value, total)
+          "(%d%%)" % (100 * value / total).round
         end
       end
     end
