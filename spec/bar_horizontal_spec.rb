@@ -4,10 +4,10 @@ require_relative '../lib/SVG/Graph/BarHorizontal'
 
 describe SVG::Graph::BarHorizontal do
   context '#burn_svg_only' do
-    it 'returns a basic SVG graph' do
-      x_axis = ['1-10', '10-30', '30-50', '50-70', 'older']
+    let(:x_axis) { ['1-10', '10-30', '30-50', '50-70', 'older'] }
 
-      options = {
+    let(:options) do
+      {
         width: 640,
         height: 500,
         stack: :side,  # the stack option is valid for Bar graphs only
@@ -30,24 +30,28 @@ describe SVG::Graph::BarHorizontal do
         show_percent: true,
         show_actual_values: true
       }
+    end
 
-      data1   = [2, 4, 6.777, 4, 2.8]
-      data2 = [1, 5, 4, 5, 2.7]
+    let(:data1) { [2, 4, 6.777, 4, 2.8] }
+    let(:data2) { [1, 5, 4, 5, 2.7] }
 
-      g = SVG::Graph::BarHorizontal.new(options)
-
-      g.add_data( {
+    let(:graph) do
+      SVG::Graph::BarHorizontal.new(options).tap do |graph|
+        graph.add_data( {
           data: data1,
           title: "Dataset1"
         })
-      g.add_data( {
+        graph.add_data( {
           data: data2,
           title: "Dataset2"
         })
+      end
+    end
 
+    it 'can write a coherent SVG file' do
       # graph.burn            # this returns a full valid xml document containing the graph
       # graph.burn_svg_only   # this only returns the <svg>...</svg> node
-      expect { File.open(File.expand_path('bar_horizontal.svg',__dir__), 'w') {|f| f.write(g.burn_svg_only)} }.not_to raise_error
+      expect { File.open(File.expand_path('bar_horizontal.svg',__dir__), 'w') {|f| f.write(graph.burn_svg_only)} }.not_to raise_error
     end
   end
 end
