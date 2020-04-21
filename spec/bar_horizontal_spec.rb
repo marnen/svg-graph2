@@ -35,26 +35,32 @@ describe SVG::Graph::BarHorizontal do
 
     let(:data1) { [2, 4, 6.777, 4, 2.8] }
     let(:data2) { [1, 5, 4, 5, 2.7] }
+    let(:title1) { 'Dataset1' }
+    let(:title2) { 'Dataset2' }
+    let(:series) { [{data: data1, title: title1}, {data: data2, title: title2}] }
 
     let(:graph) do
       SVG::Graph::BarHorizontal.new(options).tap do |graph|
-        graph.add_data( {
-          data: data1,
-          title: "Dataset1"
-        })
-        graph.add_data( {
-          data: data2,
-          title: "Dataset2"
-        })
+        series.each {|series| graph.add_data series }
       end
     end
 
     include_examples 'burn_svg_only'
 
+    let(:svg) { REXML::Document.new graph.burn_svg_only }
+
     it 'can write a coherent SVG file' do
       # graph.burn            # this returns a full valid xml document containing the graph
       # graph.burn_svg_only   # this only returns the <svg>...</svg> node
       expect { File.open(File.expand_path('bar_horizontal.svg',__dir__), 'w') {|f| f.write(graph.burn_svg_only)} }.not_to raise_error
+    end
+
+    context 'legend' do
+      it 'draws a legend entry for each series' do
+        series.each.with_index(1) do |series, i|
+          expect(svg.elements["//rect[@class='key#{i}']/following-sibling::*[1][name()='text'][@class='keyText'][text()='#{series[:title]}']"]).not_to be_nil
+        end
+      end
     end
   end
 end
