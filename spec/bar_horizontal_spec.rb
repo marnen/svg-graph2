@@ -5,12 +5,13 @@ require_relative 'shared_examples/burn_svg_only'
 
 describe SVG::Graph::BarHorizontal do
   context '#burn_svg_only' do
-    let(:graph_title) { 'kg per head and year chocolate consumption' }
-    let(:width) { 640 }
-    let(:height) { 500 }
-    let(:x_title) { 'kg/year' }
-    let(:y_axis) { ['1-10', '10-30', '30-50', '50-70', 'older'] }
-    let(:y_title) { 'Age in years' }
+    let(:graph_title) { Faker::Lorem.sentence }
+    let(:width) { rand 600..1000 }
+    let(:height) { rand 400..500 }
+    let(:length) { rand 5..8 }
+    let(:x_title) { Faker::Lorem.sentence }
+    let(:y_axis) { Faker::Lorem.words length }
+    let(:y_title) { Faker::Lorem.sentence }
 
     let(:options) do
       {
@@ -38,11 +39,12 @@ describe SVG::Graph::BarHorizontal do
       }
     end
 
-    let(:data1) { [2, 4, 6.777, 4, 2.8] }
-    let(:data2) { [1, 5, 4, 5, 2.7] }
-    let(:title1) { 'Dataset1' }
-    let(:title2) { 'Dataset2' }
-    let(:series) { [{data: data1, title: title1}, {data: data2, title: title2}] }
+    let(:series_count) { rand 2..4 }
+    let(:series) do
+      Array.new(series_count) do
+        {data: Array.new(length) { rand(0.0..10.0).send [:to_f, :to_i].sample }, title: Faker::Lorem.word}
+      end
+    end
 
     let(:graph) do
       SVG::Graph::BarHorizontal.new(options).tap do |graph|
@@ -112,12 +114,13 @@ describe SVG::Graph::BarHorizontal do
 
     context 'data bars' do
       it 'draws proportional bars for each series' do
+        epsilon = 1e-14
         series.each.with_index(1) do |series, index|
           bars = svg.all "rect.fill#{index}"
           scale_factor = bars.first[:width].to_f / series[:data].first
 
           bars.each.with_index do |bar, index|
-            expect(bar[:width].to_f).to be == series[:data][index] * scale_factor
+            expect(bar[:width].to_f).to be_within(epsilon).of(series[:data][index] * scale_factor)
           end
         end
       end
