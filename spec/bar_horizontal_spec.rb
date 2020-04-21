@@ -5,14 +5,14 @@ require_relative 'shared_examples/burn_svg_only'
 
 describe SVG::Graph::BarHorizontal do
   context '#burn_svg_only' do
-    let(:x_axis) { ['1-10', '10-30', '30-50', '50-70', 'older'] }
+    let(:y_axis) { ['1-10', '10-30', '30-50', '50-70', 'older'] }
 
     let(:options) do
       {
         width: 640,
         height: 500,
         stack: :side,  # the stack option is valid for Bar graphs only
-        fields: x_axis,
+        fields: y_axis,
         graph_title: "kg per head and year chocolate consumption",
         show_graph_title: true,
         show_x_title: true,
@@ -57,8 +57,29 @@ describe SVG::Graph::BarHorizontal do
 
     context 'legend' do
       it 'draws a legend entry for each series' do
-        series.each.with_index(1) do |series, i|
-          expect(svg.elements["//rect[@class='key#{i}']/following-sibling::*[1][name()='text'][@class='keyText'][text()='#{series[:title]}']"]).not_to be_nil
+        series.each.with_index(1) do |series, index|
+          expect(svg.elements["//rect[@class='key#{index}']/following-sibling::*[1][name()='text'][@class='keyText'][text()='#{series[:title]}']"]).not_to be_nil
+        end
+      end
+    end
+
+    context 'y axis' do
+      it 'draws the given field names on the y axis' do
+        svg.get_elements('//text[@class="yAxisLabels"]').each.with_index do |label, index|
+          expect(label.text).to be == y_axis[index]
+        end
+      end
+    end
+
+    context 'data bars' do
+      it 'draws proportional bars for each series' do
+        series.each.with_index(1) do |series, index|
+          first_bar = svg.elements["//rect[@class='fill#{index}']"]
+          scale_factor = first_bar.attributes['width'].to_f / series[:data].first
+
+          svg.get_elements("//rect[@class='fill#{index}']").each.with_index do |bar, index|
+            expect(bar.attributes['width'].to_f).to be == series[:data][index] * scale_factor
+          end
         end
       end
     end
