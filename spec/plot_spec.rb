@@ -2,11 +2,85 @@ require 'spec_helper'
 
 require_relative '../lib/SVG/Graph/Plot'
 require_relative '../lib/SVG/Graph/DataPoint'
+require_relative 'shared_examples/all_add_data'
 
 describe SVG::Graph::Plot do
-  before(:each) { DataPoint.reset_shape_criteria }
+  let(:graph) { described_class.new({}) }
+
+  describe 'constructor and defaults' do
+    subject { graph }
+
+    it { is_expected.to be_a_kind_of SVG::Graph::Graph }
+
+    it 'initializes defaults from Graph.initialize'
+
+    its(:area_fill) { is_expected.to be false }
+    its(:round_popups) { is_expected.to be true }
+    its(:scale_x_integers) { is_expected.to be false }
+    its(:scale_y_integers) { is_expected.to be false }
+    its(:show_data_points) { is_expected.to be true }
+    its(:show_lines) { is_expected.to be true }
+  end
+
+  describe '#add_data' do
+    let(:params) { {data: data} }
+    let(:graph) { super().tap {|graph| graph.add_data params } }
+    let(:pairs_count) { rand(2..5) }
+    let(:odd_number) { pairs_count * 2 + 1 }
+
+    include_examples 'all add_data'
+
+    context 'array of pairs' do
+      let(:data) { Array.new(odd_number) { Faker::Lorem.words 2} }
+
+      it 'succeeds even with an odd number of pairs' do
+        expect { graph.add_data params }.not_to raise_error
+      end
+    end
+
+    context 'odd array length' do
+      let(:data) { Faker::Lorem.words(odd_number) }
+
+      it 'raises an error' do
+        expect { graph.add_data params }.to raise_error /contained an odd set of data points/
+      end
+    end
+
+    context 'description' do
+      let(:data) { Faker::Lorem.words(pairs_count * 2) }
+      let(:description) { Faker::Lorem.words description_count }
+      let(:params) { {data: data, description: description} }
+
+      shared_examples 'invalid data' do
+        it 'raises an error' do
+          expect { graph.add_data params }.to raise_error /^Description for popups does not have same size as provided data/
+        end
+      end
+
+      context 'one entry per pair of data points' do
+        let(:description_count) { pairs_count }
+
+        it 'succeeds' do
+          expect { graph.add_data params }.not_to raise_error
+        end
+      end
+
+      context 'fewer entries than pairs' do
+        let(:description_count) { pairs_count - 1 }
+        include_examples 'invalid data'
+      end
+
+      context 'more entries than pairs' do
+        let(:description_count) { pairs_count + 1 }
+        include_examples 'invalid data'
+      end
+    end
+  end
+
 
   describe '#burn' do
+    before(:each) { DataPoint.reset_shape_criteria }
+
     let(:options) do
       {
         height: rand(400..600),
@@ -23,7 +97,7 @@ describe SVG::Graph::Plot do
     let(:svg) { graph.burn }
 
     context 'basic smoketest' do
-      let(:data) { Array.new(pairs_count * 2) { rand 20 } } # TODO: use pairs_count
+      let(:data) { Array.new(pairs_count * 2) { rand 20 } }
 
       it 'writes an SVG string including credits to SVG::Graph' do
         series2 = Array.new(rand(5..10) * 2) { rand 20 }
