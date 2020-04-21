@@ -94,7 +94,8 @@ describe SVG::Graph::Plot do
     let(:pairs_count) { rand(5..10) }
     let(:data_params) { {data: data, title: title} }
     let(:graph) { described_class.new(options).tap {|graph| graph.add_data data_params } }
-    let(:svg) { graph.burn }
+    let(:svg_text) { graph.burn }
+    let(:svg) { REXML::Document.new svg_text }
 
     context 'basic smoketest' do
       let(:data) { Array.new(pairs_count * 2) { rand 20 } }
@@ -107,7 +108,7 @@ describe SVG::Graph::Plot do
           title: Faker::Lorem.sentence
         })
 
-        expect(svg).to match /Created with SVG::Graph/
+        expect(svg_text).to match /Created with SVG::Graph/
       end
     end
 
@@ -140,10 +141,11 @@ describe SVG::Graph::Plot do
 
     context 'polyline connecting data points' do
       let(:data) { Array.new(pairs_count * 2) { rand 20 } }
+      let(:polyline) { svg.elements['//path[@class="line1"]'] }
 
       context 'default' do
         it 'draws the polyline by default' do
-          expect(svg).to match /path.*class='line1'/
+          expect(polyline).not_to be_nil
         end
       end
 
@@ -151,7 +153,7 @@ describe SVG::Graph::Plot do
         let(:options) { super().merge show_lines: false }
 
         it 'does not draw the polyline' do
-          expect(svg).not_to match /path class='line1' d='M.* L.*'/
+          expect(polyline).to be_nil
         end
       end
     end
@@ -167,11 +169,11 @@ describe SVG::Graph::Plot do
 
       context 'default' do
         it 'rounds the values to integer by default' do
-          File.write(File.expand_path("plot_#{__method__}.svg", __dir__), svg)
+          File.write(File.expand_path("plot_#{__method__}.svg", __dir__), svg_text)
 
           data.each_slice(2) do |(x, y)|
-            expect(svg).not_to include "(#{x}, #{y})"
-            expect(svg).to include "(#{x.round}, #{y.round})"
+            expect(svg_text).not_to include "(#{x}, #{y})"
+            expect(svg_text).to include "(#{x.round}, #{y.round})"
           end
         end
       end
@@ -180,11 +182,11 @@ describe SVG::Graph::Plot do
         let(:options) { super().merge round_popups: false }
 
         it 'preserves decimal values' do
-          File.write(File.expand_path("plot_#{__method__}.svg", __dir__), svg)
+          File.write(File.expand_path("plot_#{__method__}.svg", __dir__), svg_text)
 
           data.each_slice(2) do |(x, y)|
-            expect(svg).to include "(#{x}, #{y})"
-            expect(svg).not_to include "(#{x.round}, #{y.round})"
+            expect(svg_text).to include "(#{x}, #{y})"
+            expect(svg_text).not_to include "(#{x.round}, #{y.round})"
           end
         end
 
@@ -193,11 +195,11 @@ describe SVG::Graph::Plot do
           let(:data_params) { super().merge description: descriptions.dup } # TODO: apparently the :description argument gets altered! This should be fixed...
 
           it 'shows text descriptions if provided' do
-            File.write(File.expand_path("plot_#{__method__}.svg", __dir__), svg)
+            File.write(File.expand_path("plot_#{__method__}.svg", __dir__), svg_text)
 
             data.each_slice(2).with_index do |(x, y), index|
-              expect(svg).to include "(#{x}, #{y}, #{descriptions[index]})"
-              expect(svg).not_to include "(#{x}, #{y})"
+              expect(svg_text).to include "(#{x}, #{y}, #{descriptions[index]})"
+              expect(svg_text).not_to include "(#{x}, #{y})"
             end
           end
 
@@ -233,8 +235,8 @@ describe SVG::Graph::Plot do
               )
 
               File.write(File.expand_path("plot_#{__method__}.svg", __dir__), svg)
-              expect(svg).to match /polygon.*points/
-              expect(svg).to match /line.*axis/
+              expect(svg.elements['//polygon[@points]']).not_to be_nil
+              expect(svg.elements['//line[@class="axis"]']).not_to be_nil
             end
           end
         end
@@ -242,8 +244,7 @@ describe SVG::Graph::Plot do
 
       context 'radius' do
         it 'is 10 by default' do
-          expect(svg).to match /circle .*r='10'/
-          expect(svg).to match /circle .*onmouseover=.*/
+          expect(svg.elements['//circle[@onmouseover][@r=10]']).not_to be_nil
         end
 
         context ':popup_radius is specified' do
@@ -251,8 +252,7 @@ describe SVG::Graph::Plot do
           let(:options) { super().merge popup_radius: popup_radius }
 
           it 'is the value of :popup_radius' do
-            expect(svg).to match /circle .*r='#{Regexp.escape popup_radius.to_s}'/
-            expect(svg).to match /circle .*onmouseover=.*/
+            expect(svg.elements["//circle[@onmouseover][@r=#{popup_radius}]"]).not_to be_nil
           end
         end
       end
