@@ -3,5 +3,6 @@ if ENV['COVERAGE']
   SimpleCov.start
 end
 
+require 'capybara'
 require 'faker'
 require 'rspec/its'

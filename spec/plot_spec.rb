@@ -95,7 +95,7 @@ describe SVG::Graph::Plot do
     let(:data_params) { {data: data, title: title} }
     let(:graph) { described_class.new(options).tap {|graph| graph.add_data data_params } }
     let(:svg_text) { graph.burn }
-    let(:svg) { REXML::Document.new svg_text }
+    let(:svg) { Capybara.string svg_text }
 
     context 'basic smoketest' do
       let(:data) { Array.new(pairs_count * 2) { rand 20 } }
@@ -141,11 +141,11 @@ describe SVG::Graph::Plot do
 
     context 'polyline connecting data points' do
       let(:data) { Array.new(pairs_count * 2) { rand 20 } }
-      let(:polyline) { svg.elements['//path[@class="line1"]'] }
+      let(:polyline) { 'path.line1' }
 
       context 'default' do
         it 'draws the polyline by default' do
-          expect(polyline).not_to be_nil
+          expect(svg).to have_selector polyline
         end
       end
 
@@ -153,7 +153,7 @@ describe SVG::Graph::Plot do
         let(:options) { super().merge show_lines: false }
 
         it 'does not draw the polyline' do
-          expect(polyline).to be_nil
+          expect(svg).not_to have_selector polyline
         end
       end
     end
@@ -234,9 +234,8 @@ describe SVG::Graph::Plot do
                 },"OVERLAY"],
               )
 
-              File.write(File.expand_path("plot_#{__method__}.svg", __dir__), svg)
-              expect(svg.elements['//polygon[@points]']).not_to be_nil
-              expect(svg.elements['//line[@class="axis"]']).not_to be_nil
+              File.write(File.expand_path("plot_#{__method__}.svg", __dir__), svg_text)
+              ['polygon[points]', 'line.axis'].each {|selector| expect(svg).to have_selector selector }
             end
           end
         end
@@ -244,7 +243,7 @@ describe SVG::Graph::Plot do
 
       context 'radius' do
         it 'is 10 by default' do
-          expect(svg.elements['//circle[@onmouseover][@r=10]']).not_to be_nil
+          expect(svg).to have_selector 'circle[r="10"][onmouseover]'
         end
 
         context ':popup_radius is specified' do
@@ -252,7 +251,7 @@ describe SVG::Graph::Plot do
           let(:options) { super().merge popup_radius: popup_radius }
 
           it 'is the value of :popup_radius' do
-            expect(svg.elements["//circle[@onmouseover][@r=#{popup_radius}]"]).not_to be_nil
+            expect(svg).to have_selector "circle[r='#{popup_radius}'][onmouseover]"
           end
         end
       end

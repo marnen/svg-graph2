@@ -47,7 +47,7 @@ describe SVG::Graph::BarHorizontal do
 
     include_examples 'burn_svg_only'
 
-    let(:svg) { REXML::Document.new graph.burn_svg_only }
+    let(:svg) { Capybara.string graph.burn_svg_only }
 
     it 'can write a coherent SVG file' do
       # graph.burn            # this returns a full valid xml document containing the graph
@@ -58,14 +58,14 @@ describe SVG::Graph::BarHorizontal do
     context 'legend' do
       it 'draws a legend entry for each series' do
         series.each.with_index(1) do |series, index|
-          expect(svg.elements["//rect[@class='key#{index}']/following-sibling::*[1][name()='text'][@class='keyText'][text()='#{series[:title]}']"]).not_to be_nil
+          expect(svg).to have_css "rect.key#{index} + text.keyText", text: series[:title]
         end
       end
     end
 
     context 'y axis' do
       it 'draws the given field names on the y axis' do
-        svg.get_elements('//text[@class="yAxisLabels"]').each.with_index do |label, index|
+        svg.all('text.yAxisLabels').each.with_index do |label, index|
           expect(label.text).to be == y_axis[index]
         end
       end
@@ -74,11 +74,11 @@ describe SVG::Graph::BarHorizontal do
     context 'data bars' do
       it 'draws proportional bars for each series' do
         series.each.with_index(1) do |series, index|
-          first_bar = svg.elements["//rect[@class='fill#{index}']"]
-          scale_factor = first_bar.attributes['width'].to_f / series[:data].first
+          bars = svg.all "rect.fill#{index}"
+          scale_factor = bars.first[:width].to_f / series[:data].first
 
-          svg.get_elements("//rect[@class='fill#{index}']").each.with_index do |bar, index|
-            expect(bar.attributes['width'].to_f).to be == series[:data][index] * scale_factor
+          bars.each.with_index do |bar, index|
+            expect(bar[:width].to_f).to be == series[:data][index] * scale_factor
           end
         end
       end
