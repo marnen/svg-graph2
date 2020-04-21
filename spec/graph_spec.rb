@@ -64,7 +64,7 @@ describe SVG::Graph::Graph do
           include_examples 'basic SVG document'
         end
 
-        context 'compressed', pending: 'looks like the zip data may not be written correctly' do
+        context 'compressed', pending: 'looks like the compressed data may not be written correctly' do
           let(:config) { super().merge compress: true }
 
           subject { Zlib::Inflate.inflate super() }
