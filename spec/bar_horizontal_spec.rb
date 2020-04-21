@@ -21,11 +21,9 @@ describe SVG::Graph::BarHorizontal do
         fields: y_axis,
         graph_title: graph_title,
         x_title: x_title,
-        rotate_x_labels: false,
         #scale_divisions: 1,
         scale_integers: true,
         x_title_location: :end,
-        rotate_y_labels: false,
         y_title: y_title,
         y_title_location: :end,
         add_popups: true,
@@ -107,7 +105,7 @@ describe SVG::Graph::BarHorizontal do
           let(:selector) { "text.#{axis}AxisTitle" }
 
           context 'true' do
-            let(:options) { super().merge :"show_#{axis}_title" => true }
+            let(:options) { super().merge "show_#{axis}_title": true }
 
             it 'draws the axis title' do
               expect(svg).to have_selector selector, text: self.send("#{axis}_title")
@@ -121,20 +119,38 @@ describe SVG::Graph::BarHorizontal do
           end
         end
 
-        context ":show_#{axis}_labels" do
+        context 'labels' do
           let(:selector) { "text.#{axis}AxisLabels" }
 
-          context 'false' do
-            let(:options) { super().merge :"show_#{axis}_labels" => false }
+          context ":show_#{axis}_labels" do
+            context 'false' do
+              let(:options) { super().merge "show_#{axis}_labels": false }
 
-            it 'does not draw axis labels' do
-              expect(svg).not_to have_selector selector
+              it 'does not draw axis labels' do
+                expect(svg).not_to have_selector selector
+              end
+            end
+
+            context 'otherwise' do
+              it 'draws axis labels' do
+                expect(svg).to have_selector selector
+              end
             end
           end
 
-          context 'otherwise' do
-            it 'draws axis labels' do
-              expect(svg).to have_selector selector
+          context ":rotate_#{axis}_labels" do
+            context 'true' do
+              let(:options) { super().merge "rotate_#{axis}_labels": true }
+
+              it 'rotates the axis labels by 90°' do
+                svg.all(selector) {|label| expect(label['transform']).to match /rotate\(\s*90\b/ }
+              end
+            end
+
+            context 'otherwise' do
+              it 'does not rotate the axis labels' do
+                svg.all(selector) {|label| expect(label['transform']).not_to include 'rotate' }
+              end
             end
           end
         end
