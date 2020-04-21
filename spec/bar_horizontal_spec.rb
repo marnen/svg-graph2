@@ -136,31 +136,51 @@ describe SVG::Graph::BarHorizontal do
               end
             end
           end
-
-          context ":rotate_#{axis}_labels" do
-            context 'true' do
-              let(:options) { super().merge "rotate_#{axis}_labels": true }
-
-              it 'rotates the axis labels by 90°' do
-                svg.all(selector) {|label| expect(label['transform']).to match /rotate\(\s*90\b/ }
-              end
-            end
-
-            context 'otherwise' do
-              it 'does not rotate the axis labels' do
-                svg.all(selector) {|label| expect(label['transform']).not_to include 'rotate' }
-              end
-            end
-          end
         end
       end
 
       context 'x axis' do
         include_examples 'axis options', 'x'
+
+        context ':rotate_x_labels' do
+          let(:selector) { 'text.xAxisLabels' }
+
+          context 'true' do
+            let(:options) { super().merge rotate_x_labels: true }
+
+            it 'rotates the axis labels by 90°' do
+              svg.all(selector) {|label| expect(label['transform']).to match /rotate\(\s*90\b/ }
+            end
+          end
+
+          context 'otherwise' do
+            it 'does not rotate the axis labels' do
+              svg.all(selector) {|label| expect(label['transform'].to_s).not_to include 'rotate' }
+            end
+          end
+        end
       end
 
       context 'y axis' do
         include_examples 'axis options', 'y'
+
+        context ':rotate_y_labels' do
+          let(:selector) { 'text.yAxisLabels' }
+
+          context 'false' do
+            let(:options) { super().merge rotate_y_labels: false }
+
+            it 'does not rotate the axis labels' do
+              svg.all(selector) {|label| expect(label['transform'].to_s).not_to include 'rotate' }
+            end
+          end
+
+          context 'otherwise' do
+            it 'rotates the axis labels by 90°' do
+              svg.all(selector) {|label| expect(label['transform']).to match /rotate\(\s*90\b/ }
+            end
+          end
+        end
 
         it 'draws the given field names on the y axis' do
           svg.all('text.yAxisLabels').each.with_index do |label, index|
