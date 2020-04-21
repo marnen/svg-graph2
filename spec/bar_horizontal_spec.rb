@@ -82,6 +82,18 @@ describe SVG::Graph::BarHorizontal do
           end
         end
       end
+
+      it 'labels each bar with value (to 2 decimal places) and rounded percentage' do
+        series.each do |series|
+          data = series[:data]
+          total = data.inject(:+).to_f
+          data.each do |value|
+            ['text.dataPointLabel', 'text.dataPointLabelBackground'].each do |selector|
+              expect(svg).to have_selector selector, text: "#{"%.2f" % value} (#{"%d%%" % (100 * value / total).round})"
+            end
+          end
+        end
+      end
     end
   end
 end
