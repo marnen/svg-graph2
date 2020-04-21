@@ -4,3 +4,4 @@ if ENV['COVERAGE']
 end
 
 require 'faker'
+require 'rspec/its'
