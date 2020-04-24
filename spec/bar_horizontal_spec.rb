@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 require_relative '../lib/SVG/Graph/BarHorizontal'
-require_relative 'shared_examples/burn_svg_only'
+require_relative 'shared_examples/a_bar_graph'
 
 describe SVG::Graph::BarHorizontal do
   context '#burn_svg_only' do
@@ -44,7 +44,7 @@ describe SVG::Graph::BarHorizontal do
       end
     end
 
-    include_examples 'burn_svg_only'
+    it_behaves_like 'a bar graph'
 
     let(:svg) { Capybara.string graph.burn_svg_only }
 
