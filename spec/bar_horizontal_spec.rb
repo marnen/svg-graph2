@@ -6,6 +6,7 @@ require_relative 'shared_examples/a_bar_graph'
 require_relative 'shared_examples/axis_labels'
 require_relative 'shared_examples/axis_options'
 require_relative 'shared_examples/x_axis'
+require_relative 'shared_examples/y_axis'
 
 describe SVG::Graph::BarHorizontal do
   context '#burn_svg_only' do
@@ -31,28 +32,7 @@ describe SVG::Graph::BarHorizontal do
     context 'axes' do
       include_examples 'axis labels', 'y'
       include_examples 'x axis'
-
-      context 'y axis' do # TODO: unify with bar_spec once we figure out how to express the slightly different behavior
-        include_examples 'axis options', 'y'
-
-        context ':rotate_y_labels' do
-          let(:selector) { 'text.yAxisLabels' }
-
-          context 'false' do
-            let(:options) { super().merge rotate_y_labels: false }
-
-            it 'does not rotate the axis labels' do
-              svg.all(selector) {|label| expect(label['transform'].to_s).not_to include 'rotate' }
-            end
-          end
-
-          context 'otherwise' do
-            it 'rotates the axis labels by 90°' do
-              svg.all(selector) {|label| expect(label['transform']).to match /rotate\(\s*90\b/ }
-            end
-          end
-        end
-      end
+      include_examples 'y axis', rotate_y_labels_default: true
     end
   end
 end
