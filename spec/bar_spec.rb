@@ -3,10 +3,6 @@ require 'spec_helper'
 require_relative '../lib/SVG/Graph/Bar'
 require_relative 'shared_contexts/bar_graph'
 require_relative 'shared_examples/a_bar_graph'
-require_relative 'shared_examples/axis_labels'
-require_relative 'shared_examples/axis_options'
-require_relative 'shared_examples/x_axis'
-require_relative 'shared_examples/y_axis'
 
 describe SVG::Graph::Bar do
   context '#burn_svg_only' do
@@ -20,7 +16,7 @@ describe SVG::Graph::Bar do
       end
     end
 
-    it_behaves_like 'a bar graph', scale_dimension: :height
+    it_behaves_like 'a bar graph', label_axis: 'x', scale_dimension: :height, rotate_y_labels_default: false
 
     let(:svg) { Capybara.string graph.burn_svg_only }
 
@@ -28,12 +24,6 @@ describe SVG::Graph::Bar do
       # graph.burn            # this returns a full valid xml document containing the graph
       # graph.burn_svg_only   # this only returns the <svg>...</svg> node
       expect { File.open(File.expand_path('bar.svg',__dir__), 'w') {|f| f.write(graph.burn_svg_only)} }.not_to raise_error
-    end
-
-    context 'axes' do
-      include_examples 'axis labels', 'x'
-      include_examples 'x axis'
-      include_examples 'y axis', rotate_y_labels_default: false
     end
   end
 end

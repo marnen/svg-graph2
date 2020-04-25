@@ -1,6 +1,7 @@
-require_relative './burn_svg_only'
+require_relative 'axis_options'
+require_relative 'burn_svg_only'
 
-RSpec.shared_examples 'a bar graph' do |scale_dimension:|
+RSpec.shared_examples 'a bar graph' do |label_axis:, scale_dimension:, rotate_y_labels_default:|
   include_examples 'burn_svg_only'
 
   context 'dimensions' do
@@ -41,6 +42,72 @@ RSpec.shared_examples 'a bar graph' do |scale_dimension:|
       it 'draws a legend entry for each series' do
         series.each.with_index(1) do |series, index|
           expect(svg).to have_css "rect.key#{index} + text.keyText", text: series[:title]
+        end
+      end
+    end
+  end
+
+  context 'axes' do
+    context "#{label_axis} axis" do
+      it "draws the given field names on the #{label_axis} axis" do
+        svg.all("text.#{label_axis}AxisLabels").each.with_index do |label, index|
+          expect(label.text).to be == fields[index]
+        end
+      end
+    end
+
+    context 'x axis' do
+      include_examples 'axis options', 'x'
+
+      context ':rotate_x_labels' do
+        let(:selector) { 'text.xAxisLabels' }
+
+        context 'true' do
+          let(:options) { super().merge rotate_x_labels: true }
+
+          it 'rotates the axis labels by 90°' do
+            svg.all(selector) {|label| expect(label['transform']).to match /rotate\(\s*90\b/ }
+          end
+        end
+
+        context 'otherwise' do
+          it 'does not rotate the axis labels' do
+            svg.all(selector) {|label| expect(label['transform'].to_s).not_to include 'rotate' }
+          end
+        end
+      end
+    end
+
+    context 'y axis' do
+      include_examples 'axis options', 'y'
+
+      context ':rotate_y_labels' do
+        let(:selector) { 'text.yAxisLabels' }
+
+        shared_examples 'true' do
+          it 'rotates the axis labels by 90°' do
+            svg.all(selector) {|label| expect(label['transform']).to match /rotate\(\s*90\b/ }
+          end
+        end
+
+        shared_examples 'false' do
+          it 'does not rotate the axis labels' do
+            svg.all(selector) {|label| expect(label['transform'].to_s).not_to include 'rotate' }
+          end
+        end
+
+        context 'true' do
+          let(:options) { super().merge rotate_y_labels: true }
+          it_behaves_like 'true'
+        end
+
+        context 'false' do
+          let(:options) { super().merge rotate_y_labels: false }
+          it_behaves_like 'false'
+        end
+
+        context 'otherwise' do
+          it_behaves_like rotate_y_labels_default.to_s
         end
       end
     end
