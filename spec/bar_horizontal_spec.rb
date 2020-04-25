@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 require_relative '../lib/SVG/Graph/BarHorizontal'
+require_relative 'shared_contexts/bar_graph'
 require_relative 'shared_examples/a_bar_graph'
 require_relative 'shared_examples/axis_labels'
 require_relative 'shared_examples/axis_options'
@@ -8,42 +9,12 @@ require_relative 'shared_examples/x_axis'
 
 describe SVG::Graph::BarHorizontal do
   context '#burn_svg_only' do
-    let(:graph_title) { Faker::Lorem.sentence }
-    let(:width) { rand 600..1000 }
-    let(:height) { rand 400..500 }
-    let(:length) { rand 5..8 }
-    let(:x_title) { Faker::Lorem.sentence }
-    let(:fields) { Faker::Lorem.words number: length }
-    let(:y_title) { Faker::Lorem.sentence }
-
-    let(:options) do
-      {
-        width: width,
-        height: height,
-        stack: :side,  # the stack option is valid for Bar graphs only
-        fields: fields,
-        graph_title: graph_title,
-        x_title: x_title,
-        #scale_divisions: 1,
-        scale_integers: true,
-        x_title_location: :end,
-        y_title: y_title,
-        y_title_location: :end,
-        no_css: true,
-        bar_gap: true
-      }
-    end
-
-    let(:series_count) { rand 2..4 }
-    let(:series) do
-      Array.new(series_count) do
-        {data: Array.new(length) { rand(1.0..10.0).send [:to_f, :to_i].sample }, title: Faker::Lorem.word}
-      end
-    end
-
-    let(:graph) do
-      SVG::Graph::BarHorizontal.new(options).tap do |graph|
-        series.each {|series| graph.add_data series }
+    include_context 'bar graph' do
+      let(:extra_options) do
+        {
+          #scale_divisions: 1,
+          bar_gap: true
+        }
       end
     end
 
