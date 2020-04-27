@@ -75,7 +75,7 @@ describe SVG::Graph::ErrBar do
       )
 
       expect do
-        File.open(File.expand_path("test_err_bar.svg",__dir__), "w") {|fout|
+        File.open(File.expand_path("err_bar.svg",__dir__), "w") {|fout|
           fout.print( graph.burn )
         }
       end.not_to raise_error
