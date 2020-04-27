@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 require_relative '../lib/SVG/Graph/ErrBar'
+require_relative 'shared_contexts/bar_graph.rb'
 
 describe SVG::Graph::ErrBar do
   describe 'constructor' do
@@ -50,26 +51,26 @@ describe SVG::Graph::ErrBar do
   end
 
   describe '#burn' do
-    let(:fields) { %w[Jan Feb] }
-    let(:myarr1_mean) { 10 }
-    let(:myarr1_confidence) { 1 }
-    let(:myarr2_mean) { 20 }
-    let(:myarr2_confidence) { 2 }
-    let(:data_measure) { [myarr1_mean, myarr2_mean] }
-    let(:err_measure) { [myarr1_confidence, myarr2_confidence] }
+    include_context 'bar graph' do
+      let(:length) { 2 }
+      let(:myarr1_mean) { 10 }
+      let(:myarr1_confidence) { 1 }
+      let(:myarr2_mean) { 20 }
+      let(:myarr2_confidence) { 2 }
+      let(:data_measure) { [myarr1_mean, myarr2_mean] }
+      let(:err_measure) { [myarr1_confidence, myarr2_confidence] }
 
-    let(:graph) do
-      described_class.new(
-        height: 500,
-        width: 600,
-        fields: fields,
-        errorBars: err_measure
-      ).tap do |graph|
-        graph.add_data(
-          data: data_measure,
-          title: 'Sales 2002'
-        )
+      let(:options) do # TODO: make this extra_options and see how many of the parameters work
+        {
+          height: height,
+          width: width,
+          fields: fields,
+          errorBars: err_measure
+        }
       end
+
+      let(:series_count) { 1 }
+      let(:series) { [{data: data_measure, title: 'Sales 2002'}] }
     end
 
     it 'returns a basic SVG graph' do
