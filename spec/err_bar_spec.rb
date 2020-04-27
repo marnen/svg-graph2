@@ -12,19 +12,19 @@ describe SVG::Graph::ErrBar do
       myarr2_mean = 20
       myarr2_confidence = 2
 
-      data_mesure = [myarr1_mean, myarr2_mean]
+      data_measure = [myarr1_mean, myarr2_mean]
 
-      err_mesure = [myarr1_confidence, myarr2_confidence]
+      err_measure = [myarr1_confidence, myarr2_confidence]
 
       graph = SVG::Graph::ErrBar.new(
         height: 500,
         width: 600,
         fields: fields,
-        errorBars: err_mesure
+        errorBars: err_measure
       )
 
       graph.add_data(
-        data: data_mesure,
+        data: data_measure,
         title: 'Sales 2002'
       )
 
