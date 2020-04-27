@@ -1,7 +1,7 @@
 require_relative 'axis_options'
 require_relative 'burn_svg_only'
 
-RSpec.shared_examples 'a bar graph' do |label_axis:, scale_dimension:, rotate_y_labels_default:|
+RSpec.shared_examples 'a bar graph' do |label_axis:, scale_dimension:, rotate_y_labels_default:, supports_customized_data_labels: true, popup_format_string: '%.2f'|
   include_examples 'burn_svg_only'
 
   context 'dimensions' do
@@ -51,7 +51,7 @@ RSpec.shared_examples 'a bar graph' do |label_axis:, scale_dimension:, rotate_y_
     context "#{label_axis} axis" do
       it "draws the given field names on the #{label_axis} axis" do
         svg.all("text.#{label_axis}AxisLabels").each.with_index do |label, index|
-          expect(label.text).to be == fields[index]
+          expect(label.text.strip).to be == fields[index]
         end
       end
     end
@@ -133,30 +133,33 @@ RSpec.shared_examples 'a bar graph' do |label_axis:, scale_dimension:, rotate_y_
     end
 
     context 'labels and popups' do
-      shared_examples ':show_percent and :show_actual_values' do |selector_or_array|
+      shared_examples ':show_percent and :show_actual_values' do |selector_or_array, format_string: '%.2f'|
         context do
+          let(:format_string) { format_string }
           let(:selectors) { Array selector_or_array }
 
-          context ':show_percent is true' do
-            let(:options) { super().merge show_percent: true }
+          if supports_customized_data_labels
+            context ':show_percent is true' do
+              let(:options) { super().merge show_percent: true }
 
-            context ':show_actual_values is false' do
-              let(:options) { super().merge show_actual_values: false }
+              context ':show_actual_values is false' do
+                let(:options) { super().merge show_actual_values: false }
 
-              it 'displays percentage only for each bar' do
-                each_series_by_value do |value, total|
-                  selectors.each do |selector|
-                    expect(svg).to have_selector selector, exact_text: percentage(value, total), normalize_ws: true
+                it 'displays percentage only for each bar' do
+                  each_series_by_value do |value, total|
+                    selectors.each do |selector|
+                      expect(svg).to have_selector selector, exact_text: percentage(value, total), normalize_ws: true
+                    end
                   end
                 end
               end
-            end
 
-            context 'otherwise' do
-              it 'displays value (to 2 decimal places) and rounded percentage for each bar' do
-                each_series_by_value do |value, total|
-                  selectors.each do |selector|
-                    expect(svg).to have_selector selector, exact_text: "#{formatted_value value} #{percentage value, total}"
+              context 'otherwise' do
+                it "displays value (formatted as #{format_string}) and rounded percentage for each bar" do
+                  each_series_by_value do |value, total|
+                    selectors.each do |selector|
+                      expect(svg).to have_selector selector, exact_text: "#{formatted_value value} #{percentage value, total}"
+                    end
                   end
                 end
               end
@@ -164,21 +167,23 @@ RSpec.shared_examples 'a bar graph' do |label_axis:, scale_dimension:, rotate_y_
           end
 
           context 'otherwise' do
-            context ':show_actual_values is false' do
-              let(:options) { super().merge show_actual_values: false }
+            if supports_customized_data_labels
+              context ':show_actual_values is false' do
+                let(:options) { super().merge show_actual_values: false }
 
-              it 'does not display any text' do
-                selectors.each do |selector|
-                  expect(svg).not_to have_selector selector, text: /\S/
+                it 'does not display any text' do
+                  selectors.each do |selector|
+                    expect(svg).not_to have_selector selector, text: /\S/
+                  end
                 end
               end
             end
 
             context 'otherwise' do
-              it 'displays values only (to 2 decimal places) for each bar' do
+              it 'displays values only (formatted as #{format_string}) for each bar' do
                 each_series_by_value do |value, total|
                   selectors.each do |selector|
-                    expect(svg).to have_selector selector, exact_text: formatted_value(value)
+                    expect(svg).to have_selector selector, exact_text: formatted_value(value), normalize_ws: true
                   end
                 end
               end
@@ -198,7 +203,7 @@ RSpec.shared_examples 'a bar graph' do |label_axis:, scale_dimension:, rotate_y_
           end
 
           def formatted_value(value)
-            "%.2f" % value
+            format_string % value
           end
 
           def percentage(value, total)
@@ -215,7 +220,7 @@ RSpec.shared_examples 'a bar graph' do |label_axis:, scale_dimension:, rotate_y_
         context ':add_popups is true' do
           let(:options) { super().merge add_popups: true }
 
-          include_examples ':show_percent and :show_actual_values', 'text.dataPointPopup'
+          include_examples ':show_percent and :show_actual_values', 'text.dataPointPopup', format_string: popup_format_string
         end
 
         context 'otherwise' do

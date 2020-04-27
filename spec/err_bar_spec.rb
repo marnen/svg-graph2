@@ -2,6 +2,7 @@ require 'spec_helper'
 
 require_relative '../lib/SVG/Graph/ErrBar'
 require_relative 'shared_contexts/bar_graph.rb'
+require_relative 'shared_examples/a_bar_graph'
 
 describe SVG::Graph::ErrBar do
   describe 'constructor' do
@@ -60,18 +61,15 @@ describe SVG::Graph::ErrBar do
       let(:data_measure) { [myarr1_mean, myarr2_mean] }
       let(:err_measure) { [myarr1_confidence, myarr2_confidence] }
 
-      let(:options) do # TODO: make this extra_options and see how many of the parameters work
-        {
-          height: height,
-          width: width,
-          fields: fields,
-          errorBars: err_measure
-        }
-      end
+      let(:extra_options) { {errorBars: err_measure} }
 
       let(:series_count) { 1 }
       let(:series) { [{data: data_measure, title: 'Sales 2002'}] }
     end
+
+    let(:svg) { Capybara.string graph.burn }
+
+    it_behaves_like 'a bar graph', label_axis: 'x', scale_dimension: :height, rotate_y_labels_default: false, supports_customized_data_labels: false, popup_format_string: '%d' # TODO: make this behave more like the other bar graphs so we can remove all these options!
 
     it 'returns a basic SVG graph' do
       expect do
