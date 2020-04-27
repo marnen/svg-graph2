@@ -50,30 +50,29 @@ describe SVG::Graph::ErrBar do
   end
 
   describe '#burn' do
-    it 'returns a basic SVG graph' do
-      fields = %w(Jan Feb);
-      myarr1_mean = 10
-      myarr1_confidence = 1
+    let(:fields) { %w[Jan Feb] }
+    let(:myarr1_mean) { 10 }
+    let(:myarr1_confidence) { 1 }
+    let(:myarr2_mean) { 20 }
+    let(:myarr2_confidence) { 2 }
+    let(:data_measure) { [myarr1_mean, myarr2_mean] }
+    let(:err_measure) { [myarr1_confidence, myarr2_confidence] }
 
-      myarr2_mean = 20
-      myarr2_confidence = 2
-
-      data_measure = [myarr1_mean, myarr2_mean]
-
-      err_measure = [myarr1_confidence, myarr2_confidence]
-
-      graph = SVG::Graph::ErrBar.new(
+    let(:graph) do
+      described_class.new(
         height: 500,
         width: 600,
         fields: fields,
         errorBars: err_measure
-      )
+      ).tap do |graph|
+        graph.add_data(
+          data: data_measure,
+          title: 'Sales 2002'
+        )
+      end
+    end
 
-      graph.add_data(
-        data: data_measure,
-        title: 'Sales 2002'
-      )
-
+    it 'returns a basic SVG graph' do
       expect do
         File.open(File.expand_path("err_bar.svg",__dir__), "w") {|fout|
           fout.print( graph.burn )
