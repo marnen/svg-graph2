@@ -69,6 +69,7 @@ module SVG
       include REXML
 
       def initialize config
+          # TODO: error message is wrong and this should be an ArgumentError
           raise "fields was not supplied or is empty" unless config[:errorBars] &&
           config[:errorBars].kind_of?(Array) &&
           config[:errorBars].length > 0
