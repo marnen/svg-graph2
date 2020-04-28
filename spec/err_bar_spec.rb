@@ -53,23 +53,14 @@ describe SVG::Graph::ErrBar do
 
   describe '#burn' do
     include_context 'bar graph' do
-      let(:length) { 2 }
-      let(:myarr1_mean) { 10 }
-      let(:myarr1_confidence) { 1 }
-      let(:myarr2_mean) { 20 }
-      let(:myarr2_confidence) { 2 }
-      let(:data_measure) { [myarr1_mean, myarr2_mean] }
-      let(:err_measure) { [myarr1_confidence, myarr2_confidence] }
-
-      let(:extra_options) { {errorBars: err_measure} }
-
+      let(:error_bars) { series.first[:data].map {|value| rand((value * 0.1)..(value * 0.4)) } }
+      let(:extra_options) { {errorBars: error_bars} }
       let(:series_count) { 1 }
-      let(:series) { [{data: data_measure, title: 'Sales 2002'}] }
     end
 
     let(:svg) { Capybara.string graph.burn }
 
-    it_behaves_like 'a bar graph', label_axis: 'x', scale_dimension: :height, rotate_y_labels_default: false, supports_customized_data_labels: false, popup_format_string: '%d' # TODO: make this behave more like the other bar graphs so we can remove all these options!
+    it_behaves_like 'a bar graph', label_axis: 'x', scale_dimension: :height, rotate_y_labels_default: false, supports_customized_data_labels: false, normalize_popup_formatting: false # TODO: make this behave more like the other bar graphs so we can remove all these options!
 
     it 'returns a basic SVG graph' do
       expect do
