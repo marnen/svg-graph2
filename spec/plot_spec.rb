@@ -219,7 +219,7 @@ describe SVG::Graph::Plot do
                 let(:pairs_count) { 3 } # TODO: get rid of this when we refactor the one spec in this context
                 let(:descriptions) { ['one is a circle', 'two is a rectangle', 'three is a rectangle with strikethrough'] }
 
-                it 'combines different shapes based on the descriptions given' do
+                it 'combines different shapes based on the descriptions given' do |example|
                   # TODO: we may be able to move this into a higher context after we refactor it
                   # TODO: does this spec belong here, or should it be in DataPoint, or an integration spec?
                   # TODO: wherever this goes, we should clean it up a bit.
@@ -250,7 +250,7 @@ describe SVG::Graph::Plot do
                     }, "OVERLAY"],
                   )
 
-                  File.write(File.expand_path("plot_#{__method__}.svg", __dir__), svg_text)
+                  File.write(File.expand_path("#{filename_for example}.svg", __dir__), svg_text)
                   ['polygon[points]', 'line.axis'].each {|selector| expect(svg).to have_selector selector }
                 end
               end

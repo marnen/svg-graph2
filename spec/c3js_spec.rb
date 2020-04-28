@@ -176,10 +176,6 @@ describe SVG::Graph::C3js do
   end
   private
 
-  def filename_for(example)
-    example.full_description.downcase.gsub /\W/, '_'
-  end
-
   def write_file(method_name, output)
     File.open(File.expand_path("c3js_#{method_name}.html", __dir__), "w+") do |f|
       f.write(output)
