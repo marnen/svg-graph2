@@ -230,20 +230,25 @@ describe SVG::Graph::Plot do
                   #     -> return value of the lambda must be an array: [svg tag name,  Hash with keys "points" and "class"]
                   # ]
                   DataPoint.configure_shape_criteria(
-                    [/^t.*/, lambda{|x,y,line| ['polygon', {
-                      "points" => "#{x-1.5},#{y+2.5} #{x+1.5},#{y+2.5} #{x+1.5},#{y-2.5} #{x-1.5},#{y-2.5}",
-                      "class" => "dataPoint#{line}"
-                      }]
-                      }],
-                      [/^three.*/, lambda{|x,y,line| ['line', {
-                        "x1" => "#{x-4}",
-                        "y1" => y.to_s,
-                        "x2" => "#{x+4}",
-                        "y2" => y.to_s,
-                        "class" => "axis"
-                        }]
-                        },"OVERLAY"],
-                      )
+                    [/^t.*/, -> (x,y,line) {
+                      [
+                        'polygon',
+                        {"points" => "#{x-1.5},#{y+2.5} #{x+1.5},#{y+2.5} #{x+1.5},#{y-2.5} #{x-1.5},#{y-2.5}", "class" => "dataPoint#{line}"}
+                      ]
+                    }],
+                    [/^three.*/, -> (x,y,line) {
+                      [
+                        'line',
+                        {
+                          "x1" => "#{x-4}",
+                          "y1" => y.to_s,
+                          "x2" => "#{x+4}",
+                          "y2" => y.to_s,
+                          "class" => "axis"
+                        }
+                      ]
+                    }, "OVERLAY"],
+                  )
 
                   File.write(File.expand_path("plot_#{__method__}.svg", __dir__), svg_text)
                   ['polygon[points]', 'line.axis'].each {|selector| expect(svg).to have_selector selector }
