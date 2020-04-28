@@ -110,6 +110,10 @@ describe SVG::Graph::Plot do
 
         expect(svg_text).to match /Created with SVG::Graph/
       end
+
+      it 'writes a coherent SVG file' do
+        expect { File.write(File.expand_path("../plot.svg", __FILE__), graph.burn) }.not_to raise_error
+      end
     end
 
     context 'plot axis too short' do
