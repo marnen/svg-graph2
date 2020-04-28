@@ -62,6 +62,8 @@ describe SVG::Graph::ErrBar do
 
     it_behaves_like 'a bar graph', label_axis: 'x', scale_dimension: :height, rotate_y_labels_default: false, supports_customized_data_labels: false, normalize_popup_formatting: false # TODO: make this behave more like the other bar graphs so we can remove all these options!
 
+    it 'draws error bars' # TODO: figure out how to test this; we may have to add CSS first
+
     it 'returns a basic SVG graph' do
       expect do
         File.open(File.expand_path("err_bar.svg",__dir__), "w") {|fout|
