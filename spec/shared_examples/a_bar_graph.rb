@@ -1,30 +1,16 @@
+require_relative 'a_graph'
 require_relative 'axis_options'
 require_relative 'burn_svg_only'
 
 RSpec.shared_examples 'a bar graph' do |label_axis:, scale_dimension:, rotate_y_labels_default:, supports_customized_data_labels: true, normalize_popup_formatting: true|
   include_examples 'burn_svg_only'
+  it_behaves_like 'a graph', show_graph_title_default: false
 
   context 'dimensions' do
     it 'draws the graph to the specified dimensions' do
       root = svg.first 'svg'
       expect(root[:width].to_i).to be == width
       expect(root[:height].to_i).to be == height
-    end
-  end
-
-  context 'title' do
-    context ':show_graph_title is true' do
-      let(:options) { super().merge show_graph_title: true }
-
-      it 'draws the graph title' do
-        expect(svg).to have_selector 'text', text: graph_title
-      end
-    end
-
-    context 'otherwise' do
-      it 'does not draw the graph title' do
-        expect(svg).not_to have_selector 'text', text: graph_title
-      end
     end
   end
 

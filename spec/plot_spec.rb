@@ -2,6 +2,8 @@ require 'spec_helper'
 
 require_relative '../lib/SVG/Graph/Plot'
 require_relative '../lib/SVG/Graph/DataPoint'
+require_relative 'shared_contexts/graph'
+require_relative 'shared_examples/a_graph'
 require_relative 'shared_examples/all_add_data'
 
 describe SVG::Graph::Plot do
@@ -141,6 +143,10 @@ describe SVG::Graph::Plot do
     end
 
     context 'graph options' do
+      include_context 'graph'
+
+      it_behaves_like 'a graph', show_graph_title_default: false
+
       let(:data) { Array.new(pairs_count * 2) { rand 0.0..20.0 } }
 
       context 'area fill' do
