@@ -143,149 +143,158 @@ describe SVG::Graph::Plot do
     end
 
     context 'graph options' do
-      include_context 'graph'
-
-      it_behaves_like 'a graph', show_graph_title_default: false
-
-      let(:data) { Array.new(pairs_count * 2) { rand 0.0..20.0 } }
-
-      context 'area fill' do
-        let(:background) { 'rect.graphBackground' }
-
-        context ':area_fill is true' do
-          let(:options) { super().merge area_fill: true }
-
-          it 'fills the graph background' do
-            expect(svg).to have_selector background
-          end
+      context 'shared context' do
+        include_context 'graph' do
+          let(:length) { pairs_count * 2 }
+          let(:generator) { proc { rand 0.0..20.0 } }
         end
 
-        context 'otherwise' do
-          it 'does not fill the graph background' do
-            pending 'This is a bug! :area_fill defaults to false, so there should not be a background in this case, but there is.'
-            expect(svg).not_to have_selector background
-          end
-        end
-      end
+        it_behaves_like 'a graph', key_default: true, show_graph_title_default: false
 
-      context 'polyline connecting data points' do
-        let(:polyline) { 'path.line1' }
 
-        context ':show_lines is false' do
-          let(:options) { super().merge show_lines: false }
+        context 'area fill' do
+          let(:background) { 'rect.graphBackground' }
 
-          it 'does not draw the polyline' do
-            expect(svg).not_to have_selector polyline
-          end
-        end
+          context ':area_fill is true' do
+            let(:options) { super().merge area_fill: true }
 
-        context 'otherwise' do
-          it 'draws the polyline' do
-            expect(svg).to have_selector polyline
-          end
-        end
-      end
-
-      context 'popups' do
-        let(:options) do
-          super().merge(
-            add_popups: true,
-            number_format: "%s"
-          )
-        end
-
-        context ':round_popups' do
-          context 'false' do
-            let(:options) { super().merge round_popups: false }
-
-            it 'preserves decimal values' do
-              File.write(File.expand_path("plot_#{__method__}.svg", __dir__), svg_text)
-
-              data.each_slice(2) do |(x, y)|
-                expect(svg_text).to include "(#{x}, #{y})"
-                expect(svg_text).not_to include "(#{x.round}, #{y.round})"
-              end
-            end
-
-            context 'text descriptions provided' do
-              let(:descriptions) { Faker::Lorem.words number: pairs_count }
-              let(:data_params) { super().merge description: descriptions.dup } # TODO: apparently the :description argument gets altered! This should be fixed...
-
-              it 'shows text descriptions if provided' do
-                File.write(File.expand_path("plot_#{__method__}.svg", __dir__), svg_text)
-
-                data.each_slice(2).with_index do |(x, y), index|
-                  expect(svg_text).to include "(#{x}, #{y}, #{descriptions[index]})"
-                  expect(svg_text).not_to include "(#{x}, #{y})"
-                end
-              end
-
-              context ':number_format not given' do
-                let(:options) { super().tap {|options| options.delete :number_format } }
-                let(:pairs_count) { 3 } # TODO: get rid of this when we refactor the one spec in this context
-                let(:descriptions) { ['one is a circle', 'two is a rectangle', 'three is a rectangle with strikethrough'] }
-
-                it 'combines different shapes based on the descriptions given' do |example|
-                  # TODO: we may be able to move this into a higher context after we refactor it
-                  # TODO: does this spec belong here, or should it be in DataPoint, or an integration spec?
-                  # TODO: wherever this goes, we should clean it up a bit.
-
-                  # multiple array of the form
-                  # [ regex ,
-                  #   lambda taking three arguments (x,y, line_number for css)
-                  #     -> return value of the lambda must be an array: [svg tag name,  Hash with keys "points" and "class"]
-                  # ]
-                  DataPoint.configure_shape_criteria(
-                    [/^t.*/, -> (x,y,line) {
-                      [
-                        'polygon',
-                        {"points" => "#{x-1.5},#{y+2.5} #{x+1.5},#{y+2.5} #{x+1.5},#{y-2.5} #{x-1.5},#{y-2.5}", "class" => "dataPoint#{line}"}
-                      ]
-                    }],
-                    [/^three.*/, -> (x,y,line) {
-                      [
-                        'line',
-                        {
-                          "x1" => "#{x-4}",
-                          "y1" => y.to_s,
-                          "x2" => "#{x+4}",
-                          "y2" => y.to_s,
-                          "class" => "axis"
-                        }
-                      ]
-                    }, "OVERLAY"],
-                  )
-
-                  File.write(File.expand_path("#{filename_for example}.svg", __dir__), svg_text)
-                  ['polygon[points]', 'line.axis'].each {|selector| expect(svg).to have_selector selector }
-                end
-              end
+            it 'fills the graph background' do
+              expect(svg).to have_selector background
             end
           end
 
           context 'otherwise' do
-            it 'rounds the values to integer by default' do
-              File.write(File.expand_path("plot_#{__method__}.svg", __dir__), svg_text)
-
-              data.each_slice(2) do |(x, y)|
-                expect(svg_text).not_to include "(#{x}, #{y})"
-                expect(svg_text).to include "(#{x.round}, #{y.round})"
-              end
+            it 'does not fill the graph background' do
+              pending 'This is a bug! :area_fill defaults to false, so there should not be a background in this case, but there is.'
+              expect(svg).not_to have_selector background
             end
           end
         end
 
-        context 'radius' do
-          it 'is 10 by default' do
-            expect(svg).to have_selector 'circle[r="10"][onmouseover]'
+        context 'polyline connecting data points' do
+          let(:polyline) { 'path.line1' }
+
+          context ':show_lines is false' do
+            let(:options) { super().merge show_lines: false }
+
+            it 'does not draw the polyline' do
+              expect(svg).not_to have_selector polyline
+            end
           end
 
-          context ':popup_radius is specified' do
-            let(:popup_radius) { rand(1.0..3.0) }
-            let(:options) { super().merge popup_radius: popup_radius }
+          context 'otherwise' do
+            it 'draws the polyline' do
+              expect(svg).to have_selector polyline
+            end
+          end
+        end
+      end
 
-            it 'is the value of :popup_radius' do
-              expect(svg).to have_selector "circle[r='#{popup_radius}'][onmouseover]"
+      context 'legacy context' do
+        # TODO: move these into the shared context
+        let(:data) { Array.new(pairs_count * 2) { rand 0.0..20.0 } }
+
+        context 'popups' do
+          let(:options) do
+            super().merge(
+              add_popups: true,
+              number_format: "%s"
+            )
+          end
+
+          context ':round_popups' do
+            context 'false' do
+              let(:options) { super().merge round_popups: false }
+
+              it 'preserves decimal values' do
+                File.write(File.expand_path("plot_#{__method__}.svg", __dir__), svg_text)
+
+                data.each_slice(2) do |(x, y)|
+                  expect(svg_text).to include "(#{x}, #{y})"
+                  expect(svg_text).not_to include "(#{x.round}, #{y.round})"
+                end
+              end
+
+              context 'text descriptions provided' do
+                let(:descriptions) { Faker::Lorem.words number: pairs_count }
+                let(:data_params) { super().merge description: descriptions.dup } # TODO: apparently the :description argument gets altered! This should be fixed...
+
+                it 'shows text descriptions if provided' do
+                  File.write(File.expand_path("plot_#{__method__}.svg", __dir__), svg_text)
+
+                  data.each_slice(2).with_index do |(x, y), index|
+                    expect(svg_text).to include "(#{x}, #{y}, #{descriptions[index]})"
+                    expect(svg_text).not_to include "(#{x}, #{y})"
+                  end
+                end
+
+                context ':number_format not given' do
+                  let(:options) { super().tap {|options| options.delete :number_format } }
+                  let(:pairs_count) { 3 } # TODO: get rid of this when we refactor the one spec in this context
+                  let(:descriptions) { ['one is a circle', 'two is a rectangle', 'three is a rectangle with strikethrough'] }
+
+                  it 'combines different shapes based on the descriptions given' do |example|
+                    # TODO: we may be able to move this into a higher context after we refactor it
+                    # TODO: does this spec belong here, or should it be in DataPoint, or an integration spec?
+                    # TODO: wherever this goes, we should clean it up a bit.
+
+                    # multiple array of the form
+                    # [ regex ,
+                    #   lambda taking three arguments (x,y, line_number for css)
+                    #     -> return value of the lambda must be an array: [svg tag name,  Hash with keys "points" and "class"]
+                    # ]
+                    DataPoint.configure_shape_criteria(
+                      [/^t.*/, -> (x,y,line) {
+                        [
+                          'polygon',
+                          {"points" => "#{x-1.5},#{y+2.5} #{x+1.5},#{y+2.5} #{x+1.5},#{y-2.5} #{x-1.5},#{y-2.5}", "class" => "dataPoint#{line}"}
+                        ]
+                      }],
+                      [/^three.*/, -> (x,y,line) {
+                        [
+                          'line',
+                          {
+                            "x1" => "#{x-4}",
+                            "y1" => y.to_s,
+                            "x2" => "#{x+4}",
+                            "y2" => y.to_s,
+                            "class" => "axis"
+                          }
+                        ]
+                      }, "OVERLAY"],
+                    )
+
+                    File.write(File.expand_path("#{filename_for example}.svg", __dir__), svg_text)
+                    ['polygon[points]', 'line.axis'].each {|selector| expect(svg).to have_selector selector }
+                  end
+                end
+              end
+            end
+
+            context 'otherwise' do
+              it 'rounds the values to integer by default' do
+                File.write(File.expand_path("plot_#{__method__}.svg", __dir__), svg_text)
+
+                data.each_slice(2) do |(x, y)|
+                  expect(svg_text).not_to include "(#{x}, #{y})"
+                  expect(svg_text).to include "(#{x.round}, #{y.round})"
+                end
+              end
+            end
+          end
+
+          context 'radius' do
+            it 'is 10 by default' do
+              expect(svg).to have_selector 'circle[r="10"][onmouseover]'
+            end
+
+            context ':popup_radius is specified' do
+              let(:popup_radius) { rand(1.0..3.0) }
+              let(:options) { super().merge popup_radius: popup_radius }
+
+              it 'is the value of :popup_radius' do
+                expect(svg).to have_selector "circle[r='#{popup_radius}'][onmouseover]"
+              end
             end
           end
         end

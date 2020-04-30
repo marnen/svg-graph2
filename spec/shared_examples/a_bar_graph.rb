@@ -4,32 +4,13 @@ require_relative 'burn_svg_only'
 
 RSpec.shared_examples 'a bar graph' do |label_axis:, scale_dimension:, rotate_y_labels_default:, supports_customized_data_labels: true, normalize_popup_formatting: true|
   include_examples 'burn_svg_only'
-  it_behaves_like 'a graph', show_graph_title_default: false
+  it_behaves_like 'a graph', key_default: true, show_graph_title_default: false
 
   context 'dimensions' do
     it 'draws the graph to the specified dimensions' do
       root = svg.first 'svg'
       expect(root[:width].to_i).to be == width
       expect(root[:height].to_i).to be == height
-    end
-  end
-
-  context 'legend' do
-    context ':key is false' do
-      let(:options) { super().merge key: false }
-
-      it 'does not draw a legend' do
-        (1..series_count).each {|index| expect(svg).not_to have_selector ".key#{index}" }
-        expect(svg).not_to have_selector '.keyText'
-      end
-    end
-
-    context 'otherwise' do
-      it 'draws a legend entry for each series' do
-        series.each.with_index(1) do |series, index|
-          expect(svg).to have_css "rect.key#{index} + text.keyText", text: series[:title]
-        end
-      end
     end
   end
 
