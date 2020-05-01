@@ -3,12 +3,13 @@ RSpec.shared_context 'graph' do
   let(:width) { rand 600..1000 }
   let(:height) { rand 400..500 }
 
+  let(:extra_options) { {} }
   let(:options) do
     {
       width: width,
       height: height,
-      graph_title: graph_title,
-    }
+      graph_title: graph_title
+    }.merge extra_options
   end
 
   let(:length) { rand 5..8 }

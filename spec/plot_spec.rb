@@ -84,19 +84,13 @@ describe SVG::Graph::Plot do
     let(:svg_text) { graph.burn }
     let(:svg) { Capybara.string svg_text }
 
-    context 'legacy context' do
-      let(:options) do
-        {
-          height: rand(400..600),
-          width: rand(200..400),
-          key: true,
-          scale_x_integers: true,
-          scale_y_integers: true,
-        }
-      end
-      let(:title) { Faker::Lorem.sentence }
-      let(:data_params) { {data: data, title: title} }
-      let(:graph) { described_class.new(options).tap {|graph| graph.add_data data_params } }
+    include_context 'graph' do
+      let(:length) { pairs_count }
+      let(:generator) { proc { Array.new(2) { rand 0.0..20.0 } } }
+    end
+
+    context 'basic legacy tests' do
+      let(:extra_options) { {scale_x_integers: true, scale_y_integers: true} }
 
       context 'basic smoketest' do
         let(:data) { Array.new(pairs_count * 2) { rand 20 } }
@@ -146,11 +140,6 @@ describe SVG::Graph::Plot do
     end
 
     context 'graph options' do
-      include_context 'graph' do
-        let(:length) { pairs_count }
-        let(:generator) { proc { Array.new(2) { rand 0.0..20.0 } } }
-      end
-
       it_behaves_like 'a graph', key_default: true, show_graph_title_default: false
 
 
